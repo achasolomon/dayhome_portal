@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { VersioningType, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/http-exception.filter';
@@ -8,6 +8,13 @@ import { Logger } from 'nestjs-pino';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
+  });
+
+  app.setGlobalPrefix('api');
+
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
   });
 
   app.useLogger(app.get(Logger));
@@ -35,13 +42,13 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api/v1/docs', app, document);
 
   const port = process.env.PORT || 4000;
 
   await app.listen(port);
 
-  console.log(`App is running on http://localhost:${port}`);
+  app.get(Logger).log(`App is running on http://localhost:${port}`);
 }
 
 void bootstrap();

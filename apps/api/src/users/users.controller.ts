@@ -5,7 +5,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('Users')
-@Controller('users')
+@Controller({ path: 'users', version: '1' })
 export class UsersController {
   @Post()
   @ApiOperation({

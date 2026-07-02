@@ -2,6 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { LoggerModule } from 'nestjs-pino';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { BullModule } from '@nestjs/bullmq';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -9,6 +13,10 @@ import { RedisModule } from './redis/redis.module';
 import { envValidationSchema } from './config/env.validation';
 import { UsersModule } from './users/users.module';
 import { HealthModule } from './health/health.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { MailModule } from './mail/mail.module';
+import { StorageModule } from './storage/storage.module';
+import { QueuesModule } from './queues/queues.module';
 
 @Module({
   imports: [
@@ -40,6 +48,36 @@ import { HealthModule } from './health/health.module';
       },
     }),
 
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          host: config.get('MAIL_HOST'),
+          port: Number(config.get('MAIL_PORT')),
+          secure: false,
+        },
+        defaults: {
+          from: config.get('MAIL_FROM'),
+        },
+      }),
+    }),
+
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 20,
+      },
+    ]),
+
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get<string>('REDIS_HOST'),
+          port: Number(config.get('REDIS_PORT')),
+        },
+      }),
+    }),
     SequelizeModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
@@ -60,8 +98,18 @@ import { HealthModule } from './health/health.module';
     RedisModule,
     UsersModule,
     HealthModule,
+    MailModule,
+    StorageModule,
+    PrometheusModule.register(),
+    QueuesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
