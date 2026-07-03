@@ -1,14 +1,36 @@
 import { VersioningType, ValidationPipe } from '@nestjs/common';
+import type { RequestHandler } from 'express';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/http-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
+import { createBullBoard } from '@bull-board/api';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import { ExpressAdapter } from '@bull-board/express';
+import { getQueueToken } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
+
+  const serverAdapter = new ExpressAdapter();
+  serverAdapter.setBasePath('/api/v1/admin/queues');
+
+  const emailQueue = app.get<Queue>(getQueueToken('email'));
+
+  createBullBoard({
+    queues: [new BullMQAdapter(emailQueue)],
+    serverAdapter,
+  });
+
+  const httpAdapter = app.getHttpAdapter();
+  httpAdapter.use(
+    '/api/v1/admin/queues',
+    serverAdapter.getRouter() as RequestHandler,
+  );
 
   app.setGlobalPrefix('api');
 

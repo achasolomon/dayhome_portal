@@ -12,11 +12,13 @@ import { AppService } from './app.service';
 import { RedisModule } from './redis/redis.module';
 import { envValidationSchema } from './config/env.validation';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailModule } from './mail/mail.module';
 import { StorageModule } from './storage/storage.module';
 import { QueuesModule } from './queues/queues.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -96,7 +98,9 @@ import { QueuesModule } from './queues/queues.module';
     }),
 
     RedisModule,
+    DatabaseModule,
     UsersModule,
+    AuthModule,
     HealthModule,
     MailModule,
     StorageModule,
