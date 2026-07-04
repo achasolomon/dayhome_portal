@@ -1,10 +1,8 @@
-import { QueryInterface, DataTypes } from 'sequelize';
+const { DataTypes } = require('sequelize');
 
 module.exports = {
-  up: async (queryInterface: QueryInterface) => {
-    await queryInterface.sequelize.query(
-      'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";',
-    );
+  up: async (queryInterface) => {
+    await queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";');
 
     await queryInterface.createTable('organizations', {
       id: {
@@ -39,13 +37,7 @@ module.exports = {
       address: { type: DataTypes.TEXT },
       capacity: { type: DataTypes.INTEGER },
       status: {
-        type: DataTypes.ENUM(
-          'PENDING',
-          'ACTIVE',
-          'SUSPENDED',
-          'REJECTED',
-          'CLOSED',
-        ),
+        type: DataTypes.ENUM('PENDING', 'ACTIVE', 'SUSPENDED', 'REJECTED', 'CLOSED'),
         defaultValue: 'PENDING',
       },
       licenseNumber: { type: DataTypes.STRING(100) },
@@ -262,27 +254,13 @@ module.exports = {
         onDelete: 'SET NULL',
       },
       documentType: {
-        type: DataTypes.ENUM(
-          'LICENSE',
-          'INSURANCE',
-          'FIRE_INSPECTION',
-          'HEALTH_INSPECTION',
-          'FIRST_AID_CERT',
-          'POLICE_CHECK',
-          'TRAINING_CERT',
-          'OTHER',
-        ),
+        type: DataTypes.ENUM('LICENSE', 'INSURANCE', 'FIRE_INSPECTION', 'HEALTH_INSPECTION', 'FIRST_AID_CERT', 'POLICE_CHECK', 'TRAINING_CERT', 'OTHER'),
         allowNull: false,
       },
       fileUrl: { type: DataTypes.STRING(500), allowNull: false },
       expiryDate: { type: DataTypes.DATEONLY },
       status: {
-        type: DataTypes.ENUM(
-          'ACTIVE',
-          'EXPIRING_SOON',
-          'EXPIRED',
-          'SUPERSEDED',
-        ),
+        type: DataTypes.ENUM('ACTIVE', 'EXPIRING_SOON', 'EXPIRED', 'SUPERSEDED'),
         defaultValue: 'ACTIVE',
       },
       version: { type: DataTypes.INTEGER, defaultValue: 1 },
@@ -339,15 +317,7 @@ module.exports = {
       email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
       password: { type: DataTypes.STRING(255), allowNull: false },
       role: {
-        type: DataTypes.ENUM(
-          'SUPER_ADMIN',
-          'ORG_ADMIN',
-          'ORG_MANAGER',
-          'DAYHOME_OWNER',
-          'EDUCATOR',
-          'PARENT',
-          'GOVERNMENT',
-        ),
+        type: DataTypes.ENUM('SUPER_ADMIN', 'ORG_ADMIN', 'ORG_MANAGER', 'DAYHOME_OWNER', 'EDUCATOR', 'PARENT', 'GOVERNMENT'),
         defaultValue: 'ORG_ADMIN',
         allowNull: false,
       },
@@ -371,7 +341,7 @@ module.exports = {
     await queryInterface.addIndex('enrollments', ['dayhomeId']);
   },
 
-  down: async (queryInterface: QueryInterface) => {
+  down: async (queryInterface) => {
     const tables = [
       'audit_logs',
       'messages',

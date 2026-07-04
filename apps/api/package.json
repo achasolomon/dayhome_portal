@@ -18,10 +18,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "db:create": "sequelize-cli db:create",
-    "db:migrate": "sequelize-cli db:migrate",
-    "db:seed": "sequelize-cli db:seed:all",
-    "db:reset": "sequelize-cli db:drop && sequelize-cli db:create && sequelize-cli db:migrate && sequelize-cli db:seed:all"
+    "db:create": "sequelize-cli db:create --config src/database/config.cjs",
+    "db:migrate": "sequelize-cli db:migrate --config src/database/config.cjs --migrations-path src/database/migrations",
+    "db:seed": "sequelize-cli db:seed:all --config src/database/config.cjs --seeders-path src/database/seeders",
+    "db:reset": "sequelize-cli db:drop --config src/database/config.cjs && sequelize-cli db:create --config src/database/config.cjs && sequelize-cli db:migrate --config src/database/config.cjs --migrations-path src/database/migrations && sequelize-cli db:seed:all --config src/database/config.cjs --seeders-path src/database/seeders"
   },
   "dependencies": {
     "@bull-board/api": "^8.0.2",
