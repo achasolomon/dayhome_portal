@@ -1,0 +1,81 @@
+export enum UserRole {
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  ORG_ADMIN = 'ORG_ADMIN',
+  ORG_MANAGER = 'ORG_MANAGER',
+  BILLING_ONLY = 'BILLING_ONLY',
+  DAYHOME_OWNER = 'DAYHOME_OWNER',
+  EDUCATOR = 'EDUCATOR',
+  PARENT = 'PARENT',
+  GOVERNMENT = 'GOVERNMENT',
+}
+
+export enum DayhomeStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  REJECTED = 'REJECTED',
+  CLOSED = 'CLOSED',
+}
+
+export enum RoomAgeGroup {
+  INFANT = 'INFANT',
+  TODDLER = 'TODDLER',
+  PRESCHOOL = 'PRESCHOOL',
+  SCHOOL_AGE = 'SCHOOL_AGE',
+}
+
+export enum EducatorStatus {
+  ACTIVE = 'ACTIVE',
+  ON_LEAVE = 'ON_LEAVE',
+  TERMINATED = 'TERMINATED',
+}
+
+export enum EnrollmentStatus {
+  ACTIVE = 'ACTIVE',
+  WAITLISTED = 'WAITLISTED',
+  WITHDRAWN = 'WITHDRAWN',
+}
+
+export enum AttendanceStatus {
+  PRESENT = 'PRESENT',
+  ABSENT = 'ABSENT',
+  LATE = 'LATE',
+}
+
+export enum InvoiceStatus {
+  DRAFT = 'DRAFT',
+  SENT = 'SENT',
+  PAID = 'PAID',
+  OVERDUE = 'OVERDUE',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum DocumentType {
+  LICENSE = 'LICENSE',
+  INSURANCE = 'INSURANCE',
+  FIRE_INSPECTION = 'FIRE_INSPECTION',
+  HEALTH_INSPECTION = 'HEALTH_INSPECTION',
+  FIRST_AID_CERT = 'FIRST_AID_CERT',
+  POLICE_CHECK = 'POLICE_CHECK',
+  TRAINING_CERT = 'TRAINING_CERT',
+  OTHER = 'OTHER',
+}
+
+export enum DocumentStatus {
+  ACTIVE = 'ACTIVE',
+  EXPIRING_SOON = 'EXPIRING_SOON',
+  EXPIRED = 'EXPIRED',
+  SUPERSEDED = 'SUPERSEDED',
+}
+
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  OTHER = 'OTHER',
+  PREFER_NOT_TO_SAY = 'PREFER_NOT_TO_SAY',
+}
+
+export enum OrganizationStatus {
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+}

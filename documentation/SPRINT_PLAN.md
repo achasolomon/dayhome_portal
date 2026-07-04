@@ -395,3 +395,28 @@
 - [ ] All user-visible strings use translation keys
 - [ ] Migration created for schema changes
 - [ ] Audit log entries created for state-changing actions
+
+---
+
+## DEPRECATION NOTICE
+
+**This sprint plan is superseded.** It contained architectural assumptions (manual dayhome registration) that do not match the actual system requirements.
+
+### Replacement Documents
+
+| Document | File |
+|---|---|
+| System Architecture & Workflows | `SYSTEM_GUIDE.md` |
+| Corrected Sprint Roadmap | `SPRINT_ROADMAP.md` |
+| Developer Setup Guide | `DEVELOPMENT_GUIDE.md` |
+
+### Key Corrections
+
+1. Dayhome onboarding: **API intake webhook** from external Application Portal (not manual registration)
+2. Status machine: No `PENDING` — dayhomes arrive pre-approved as `ACTIVE`
+3. Digital health screening added to check-in flow
+4. Billing-only role added to RBAC
+5. Government submission flow added to reporting
+6. Curriculum/portfolios/meal plans deferred to P3
+
+*This file retained for reference only.*

@@ -9,6 +9,24 @@ export class UserDto {
   email!: string;
 
   @ApiProperty()
+  role!: string;
+
+  @ApiProperty()
+  firstName?: string;
+
+  @ApiProperty()
+  lastName?: string;
+
+  @ApiProperty()
+  organizationId?: string;
+
+  @ApiProperty()
+  dayhomeId?: string;
+
+  @ApiProperty()
+  permissions?: string[];
+
+  @ApiProperty()
   createdAt!: Date;
 
   @ApiProperty()
@@ -18,6 +36,12 @@ export class UserDto {
     return {
       id: user.id,
       email: user.email,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      organizationId: user.organizationId,
+      dayhomeId: user.dayhomeId,
+      permissions: user.permissions,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

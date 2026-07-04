@@ -2,6 +2,7 @@ import { VersioningType, ValidationPipe } from '@nestjs/common';
 import type { RequestHandler } from 'express';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import cookieParser from 'cookie-parser';
 import { HttpExceptionFilter } from './common/http-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
@@ -20,9 +21,10 @@ async function bootstrap() {
   serverAdapter.setBasePath('/api/v1/admin/queues');
 
   const emailQueue = app.get<Queue>(getQueueToken('email'));
+  const deadLetterQueue = app.get<Queue>(getQueueToken('dead-letter'));
 
   createBullBoard({
-    queues: [new BullMQAdapter(emailQueue)],
+    queues: [new BullMQAdapter(emailQueue), new BullMQAdapter(deadLetterQueue)],
     serverAdapter,
   });
 
@@ -40,6 +42,8 @@ async function bootstrap() {
   });
 
   app.useLogger(app.get(Logger));
+
+  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({
