@@ -41,6 +41,17 @@ async function bootstrap() {
     defaultVersion: '1',
   });
 
+  app.enableCors({
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  });
+
   app.useLogger(app.get(Logger));
 
   app.use(cookieParser());

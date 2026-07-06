@@ -1,13 +1,12 @@
-import { QueryInterface } from 'sequelize';
-import * as bcrypt from 'bcryptjs';
+const bcrypt = require('bcryptjs');
 
 module.exports = {
-  up: async (queryInterface: QueryInterface) => {
+  up: async (queryInterface) => {
     const passwordHash = await bcrypt.hash('Password123!', 10);
 
     await queryInterface.bulkInsert('organizations', [
       {
-        id: 'org-001',
+        id: '11111111-1111-4111-8111-111111111111',
         name: 'Spiced Childcare HQ',
         email: 'admin@spiced.ca',
         status: 'ACTIVE',
@@ -18,13 +17,13 @@ module.exports = {
 
     await queryInterface.bulkInsert('users', [
       {
-        id: 'user-001',
+        id: '22222222-2222-4222-8222-222222222222',
         email: 'super@spiced.ca',
         password: passwordHash,
         role: 'SUPER_ADMIN',
         firstName: 'Super',
         lastName: 'Admin',
-        permissions: ['*'],
+        permissions: '["*"]',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -32,8 +31,8 @@ module.exports = {
 
     await queryInterface.bulkInsert('dayhomes', [
       {
-        id: 'dh-001',
-        organizationId: 'org-001',
+        id: '33333333-3333-4333-8333-333333333333',
+        organizationId: '11111111-1111-4111-8111-111111111111',
         name: 'Little Stars Dayhome',
         address: '123 Maple Street, Edmonton, AB',
         capacity: 16,
@@ -44,8 +43,8 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 'dh-002',
-        organizationId: 'org-001',
+        id: '44444444-4444-4444-8444-444444444444',
+        organizationId: '11111111-1111-4111-8111-111111111111',
         name: 'Sunshine Dayhome',
         address: '456 Oak Avenue, Calgary, AB',
         capacity: 12,
@@ -59,8 +58,8 @@ module.exports = {
 
     await queryInterface.bulkInsert('rooms', [
       {
-        id: 'room-001',
-        dayhomeId: 'dh-001',
+        id: '55555555-5555-4555-8555-555555555555',
+        dayhomeId: '33333333-3333-4333-8333-333333333333',
         name: 'Infant Room',
         capacity: 4,
         ageGroup: 'INFANT',
@@ -68,8 +67,8 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 'room-002',
-        dayhomeId: 'dh-001',
+        id: '66666666-6666-4666-8666-666666666666',
+        dayhomeId: '33333333-3333-4333-8333-333333333333',
         name: 'Toddler Room',
         capacity: 6,
         ageGroup: 'TODDLER',
@@ -77,8 +76,8 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 'room-003',
-        dayhomeId: 'dh-001',
+        id: '77777777-7777-4777-8777-777777777777',
+        dayhomeId: '33333333-3333-4333-8333-333333333333',
         name: 'Preschool Room',
         capacity: 6,
         ageGroup: 'PRESCHOOL',
@@ -89,8 +88,8 @@ module.exports = {
 
     await queryInterface.bulkInsert('educators', [
       {
-        id: 'edu-001',
-        dayhomeId: 'dh-001',
+        id: '88888888-8888-4888-8888-888888888888',
+        dayhomeId: '33333333-3333-4333-8333-333333333333',
         firstName: 'Sarah',
         lastName: 'Johnson',
         email: 'sarah.johnson@spiced.ca',
@@ -101,8 +100,8 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 'edu-002',
-        dayhomeId: 'dh-001',
+        id: '99999999-9999-4999-8999-999999999999',
+        dayhomeId: '33333333-3333-4333-8333-333333333333',
         firstName: 'Michael',
         lastName: 'Chen',
         email: 'michael.chen@spiced.ca',
@@ -116,8 +115,8 @@ module.exports = {
 
     await queryInterface.bulkInsert('families', [
       {
-        id: 'fam-001',
-        organizationId: 'org-001',
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        organizationId: '11111111-1111-4111-8111-111111111111',
         primaryContactName: 'Emily Davis',
         email: 'emily.davis@example.com',
         phone: '780-555-0201',
@@ -126,8 +125,8 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 'fam-002',
-        organizationId: 'org-001',
+        id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        organizationId: '11111111-1111-4111-8111-111111111111',
         primaryContactName: 'James Wilson',
         email: 'james.wilson@example.com',
         phone: '780-555-0202',
@@ -139,8 +138,8 @@ module.exports = {
 
     await queryInterface.bulkInsert('children', [
       {
-        id: 'ch-001',
-        familyId: 'fam-001',
+        id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        familyId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         firstName: 'Lily',
         lastName: 'Davis',
         dateOfBirth: '2022-03-15',
@@ -151,20 +150,20 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
-        id: 'ch-002',
-        familyId: 'fam-001',
+        id: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+        familyId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         firstName: 'Noah',
         lastName: 'Davis',
         dateOfBirth: '2023-08-01',
         gender: 'MALE',
-        allergies: [],
+        allergies: [''],
         medicalNotes: '',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: 'ch-003',
-        familyId: 'fam-002',
+        id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+        familyId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
         firstName: 'Emma',
         lastName: 'Wilson',
         dateOfBirth: '2021-11-20',
@@ -178,30 +177,30 @@ module.exports = {
 
     await queryInterface.bulkInsert('enrollments', [
       {
-        id: 'enr-001',
-        childId: 'ch-001',
-        dayhomeId: 'dh-001',
-        roomId: 'room-002',
+        id: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+        childId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        dayhomeId: '33333333-3333-4333-8333-333333333333',
+        roomId: '66666666-6666-4666-8666-666666666666',
         startDate: '2024-09-01',
         status: 'ACTIVE',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: 'enr-002',
-        childId: 'ch-002',
-        dayhomeId: 'dh-001',
-        roomId: 'room-001',
+        id: '10101010-1010-4101-8101-101010101010',
+        childId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+        dayhomeId: '33333333-3333-4333-8333-333333333333',
+        roomId: '55555555-5555-4555-8555-555555555555',
         startDate: '2025-01-15',
         status: 'ACTIVE',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: 'enr-003',
-        childId: 'ch-003',
-        dayhomeId: 'dh-001',
-        roomId: 'room-003',
+        id: '12121212-1212-4121-8121-121212121212',
+        childId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+        dayhomeId: '33333333-3333-4333-8333-333333333333',
+        roomId: '77777777-7777-4777-8777-777777777777',
         startDate: '2024-09-01',
         status: 'ACTIVE',
         createdAt: new Date(),
@@ -211,22 +210,22 @@ module.exports = {
 
     await queryInterface.bulkInsert('attendance_records', [
       {
-        id: 'att-001',
-        childId: 'ch-001',
-        checkedInBy: 'edu-001',
+        id: '13131313-1313-4131-8131-131313131313',
+        childId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        checkedInBy: '88888888-8888-4888-8888-888888888888',
         checkInTime: new Date('2026-07-03T08:10:00'),
-        checkedOutBy: 'edu-001',
+        checkedOutBy: '88888888-8888-4888-8888-888888888888',
         checkOutTime: new Date('2026-07-03T16:30:00'),
         status: 'PRESENT',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: 'att-002',
-        childId: 'ch-002',
-        checkedInBy: 'edu-001',
+        id: '14141414-1414-4141-8141-141414141414',
+        childId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+        checkedInBy: '88888888-8888-4888-8888-888888888888',
         checkInTime: new Date('2026-07-03T08:25:00'),
-        checkedOutBy: 'edu-002',
+        checkedOutBy: '99999999-9999-4999-8999-999999999999',
         checkOutTime: new Date('2026-07-03T16:00:00'),
         status: 'PRESENT',
         createdAt: new Date(),
@@ -235,7 +234,7 @@ module.exports = {
     ]);
   },
 
-  down: async (queryInterface: QueryInterface) => {
+  down: async (queryInterface) => {
     const tables = [
       'attendance_records',
       'enrollments',

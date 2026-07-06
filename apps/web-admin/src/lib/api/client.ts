@@ -14,7 +14,8 @@ apiClient.interceptors.request.use((config) => {
 });
 
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (value: unknown) => void; reject: (reason: unknown) => void }> = [];
+let failedQueue: Array<{ resolve: (value: unknown) => void; reject: (reason: unknown) => void }> =
+  [];
 
 apiClient.interceptors.response.use(
   (response) => response,
@@ -40,7 +41,7 @@ apiClient.interceptors.response.use(
           {},
           { withCredentials: true },
         );
-        const { accessToken, user } = response.data.data;
+        const { accessToken, user } = response.data;
         useAuthStore.getState().setTokens(accessToken, user);
 
         failedQueue.forEach((p) => p.resolve(accessToken));
