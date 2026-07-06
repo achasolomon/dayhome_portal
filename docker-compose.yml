@@ -60,7 +60,22 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
 
+  clamav:
+    image: clamav/clamav:latest
+    container_name: spiced-clamav
+    restart: unless-stopped
+    ports:
+      - "3310:3310"
+    volumes:
+      - clamav_data:/var/lib/clamav
+    healthcheck:
+      test: ["CMD", "clamdcheck", "host.docker.internal"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 volumes:
   postgres_data:
   minio_data:
   grafana_data:
+  clamav_data:

@@ -317,7 +317,7 @@ module.exports = {
       email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
       password: { type: DataTypes.STRING(255), allowNull: false },
       role: {
-        type: DataTypes.ENUM('SUPER_ADMIN', 'ORG_ADMIN', 'ORG_MANAGER', 'DAYHOME_OWNER', 'EDUCATOR', 'PARENT', 'GOVERNMENT'),
+        type: DataTypes.ENUM('SUPER_ADMIN', 'ORG_ADMIN', 'ORG_MANAGER', 'BILLING_ONLY', 'DAYHOME_OWNER', 'EDUCATOR', 'PARENT', 'GOVERNMENT'),
         defaultValue: 'ORG_ADMIN',
         allowNull: false,
       },

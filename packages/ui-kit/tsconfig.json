@@ -3,7 +3,11 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@spiced-dayhome/shared-utils": ["../shared-utils/src/index.ts"]
+    }
   },
   "include": ["src"]
 }

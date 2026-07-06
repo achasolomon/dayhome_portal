@@ -42,10 +42,10 @@ export interface ApiError {
 export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
-  user: Record<string, unknown>;
+  user: import('./models').IUser;
 }
 
 export interface RefreshResponse {
   accessToken: string;
-  user: Record<string, unknown>;
+  user: import('./models').IUser;
 }

@@ -8,6 +8,9 @@
     "build": "tsc",
     "dev": "tsc --watch"
   },
+  "dependencies": {
+    "@spiced-dayhome/shared-types": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "^5.7.3"
   }
