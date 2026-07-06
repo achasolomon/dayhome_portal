@@ -9,14 +9,7 @@ export type { InputProps } from './ui/input';
 export { Badge, badgeVariants } from './ui/badge';
 export type { BadgeProps } from './ui/badge';
 
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from './ui/card';
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './ui/card';
 
 export {
   Modal,
@@ -64,3 +57,17 @@ export {
 
 export { DataTable } from './ui/data-table';
 export type { Column, DataTableProps } from './ui/data-table';
+
+export {
+  Sheet,
+  SheetPortal,
+  SheetOverlay,
+  SheetClose,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetBody,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription,
+} from './ui/sheet';

@@ -1,3 +1,59 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 96%;
+    --foreground: 262 20% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 262 20% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 262 20% 15%;
+    --primary: 262 40% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 262 20% 96%;
+    --secondary-foreground: 262 20% 25%;
+    --muted: 262 16% 94%;
+    --muted-foreground: 262 10% 45%;
+    --accent: 262 16% 92%;
+    --accent-foreground: 262 20% 20%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 58% 34%;
+    --success-foreground: 0 0% 100%;
+    --warning: 25 95% 47%;
+    --warning-foreground: 0 0% 100%;
+    --border: 262 15% 88%;
+    --input: 262 15% 88%;
+    --ring: 262 40% 42%;
+    --radius: 0.75rem;
+
+    --sidebar-background: 260 25% 11%;
+    --sidebar-foreground: 260 8% 62%;
+    --sidebar-accent: 40 60% 20%;
+    --sidebar-accent-foreground: 40 94% 75%;
+    --sidebar-border: 260 20% 18%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+}

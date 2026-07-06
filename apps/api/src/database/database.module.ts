@@ -14,6 +14,7 @@ import {
   Document,
   Message,
   AuditLog,
+  Invitation,
 } from './models';
 
 const models = [
@@ -30,6 +31,7 @@ const models = [
   Document,
   Message,
   AuditLog,
+  Invitation,
 ];
 
 @Global()

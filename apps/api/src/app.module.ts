@@ -13,6 +13,8 @@ import { RedisModule } from './redis/redis.module';
 import { envValidationSchema } from './config/env.validation';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { OrganizationModule } from './modules/organization/organization.module';
+import { StaffModule } from './modules/staff/staff.module';
 import { HealthModule } from './health/health.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailModule } from './mail/mail.module';
@@ -101,6 +103,8 @@ import { DatabaseModule } from './database/database.module';
     DatabaseModule,
     UsersModule,
     AuthModule,
+    OrganizationModule,
+    StaffModule,
     HealthModule,
     MailModule,
     StorageModule,

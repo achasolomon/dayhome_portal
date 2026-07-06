@@ -1,4 +1,3 @@
-// queues.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -21,5 +20,18 @@ export class QueuesService {
         removeOnFail: 100,
       },
     );
+  }
+
+  async queueInviteEmail(data: {
+    email: string;
+    token: string;
+    organizationId: string;
+  }) {
+    await this.emailQueue.add('send-invite', data, {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 5000 },
+      removeOnComplete: 100,
+      removeOnFail: 100,
+    });
   }
 }

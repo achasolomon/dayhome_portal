@@ -1,23 +1,31 @@
-import Link from 'next/link';
+'use client';
+
+import { useState } from 'react';
+import { cn } from '@spiced-dayhome/ui-kit';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <aside className="w-64 border-r bg-white p-4">
-        <h2 className="mb-6 text-lg font-bold text-primary">Spiced Admin</h2>
-        <nav className="space-y-2">
-          <Link href="/dashboard" className="block rounded px-3 py-2 text-sm hover:bg-primary-50">
-            Dashboard
-          </Link>
-          <Link href="/organizations" className="block rounded px-3 py-2 text-sm hover:bg-primary-50">
-            Organizations
-          </Link>
-          <Link href="/dayhomes" className="block rounded px-3 py-2 text-sm hover:bg-primary-50">
-            Dayhomes
-          </Link>
-        </nav>
-      </aside>
-      <main className="flex-1 p-8">{children}</main>
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar
+        open={sidebarOpen}
+        collapsed={sidebarCollapsed}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <div className={cn('flex flex-1 flex-col overflow-hidden transition-all duration-200')}>
+        <Header
+          onMenuClick={() => setSidebarOpen(true)}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((c) => !c)}
+        />
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

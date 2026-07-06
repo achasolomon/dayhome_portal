@@ -76,33 +76,38 @@
 
 ---
 
-## Sprint 2 â€” Dayhome Management (Week 5â€“6)
+## Sprint 2 — Dayhome Management & API Intake (Week 5–6)
 
-**Goal:** Dayhome registration, approval workflow, room management, capacity tracking.
+> **CORRECTED:** The old plan described manual dayhome registration. Dayhomes actually arrive pre-approved via an API intake webhook from the external Application Portal. See `SYSTEM_GUIDE.md` and `SPRINT_ROADMAP.md` for the authoritative plan.
+
+**Goal:** API intake webhook, dayhome/room management, scaffold dayhome owner portal.
 
 ### User Stories
 
-| ID    | Story                                                                                                                     | Acceptance Criteria                                                                                        |
-| ----- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| S2-01 | **As a DAYHOME_OWNER**, I want to register my dayhome with details (capacity, address, license) so that it can be listed. | `POST /api/v1/dayhomes` creates with `PENDING` status; upload of license document.                         |
-| S2-02 | **As an ORG_ADMIN**, I want to approve or reject a dayhome application so that only qualified dayhomes operate.           | `POST /dayhomes/:id/approve` â†’ status to `ACTIVE`; `POST /dayhomes/:id/reject` â†’ status to `REJECTED`. |
-| S2-03 | **As a DAYHOME_OWNER**, I want to suspend my dayhome temporarily so that I can manage closures.                           | `POST /dayhomes/:id/suspend` â†’ status `SUSPENDED`; children cannot be checked in.                        |
-| S2-04 | **As a DAYHOME_OWNER**, I want to manage rooms (name, capacity, age group) so that children can be assigned.              | Full CRUD for rooms scoped to dayhome; capacity validation.                                                |
-| S2-05 | **As an ORG_ADMIN**, I want to view all dayhomes with status filters so that I can monitor the network.                   | List with filters: status, search by name, pagination.                                                     |
+| ID    | Story                                                                                                                          | Acceptance Criteria                                                                                                                           |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| S2-01 | **As the Application Portal**, I want to push approved dayhome records via API webhook so that they are created in the system. | `POST /api/v1/dayhomes/intake` validates HMAC signature → checks idempotency key → maps fields → creates dayhome with `ACTIVE` status.        |
+| S2-02 | **As an ORG_ADMIN**, I want to view dayhomes with status filters so that I can monitor my network.                             | List with filters: status, search by name/address, pagination; each item shows child count, capacity %, compliance status.                    |
+| S2-03 | **As an ORG_ADMIN**, I want to manage dayhome status so that I can suspend or close non-compliant dayhomes.                    | `POST /dayhomes/:id/suspend`, `/activate`, `/close` — transitions validated; suspended dayhomes block check-ins.                              |
+| S2-04 | **As an ORG_ADMIN**, I want to assign an agency liaison to a dayhome so that there is a clear point of contact.                | `PATCH /dayhomes/:id` with `liaisonUserId` field; liaison shown on dayhome detail page.                                                       |
+| S2-05 | **As a Dayhome Owner**, I want to manage my rooms (name, capacity, age group) so that children can be assigned correctly.      | Full CRUD for rooms; capacity validation (cannot reduce below current enrollment); age group filter (infant, toddler, preschool, school-age). |
+| S2-06 | **As a Dayhome Owner**, I want to access my dayhome dashboard and configure rooms after receiving the welcome email.           | Owner clicks welcome email → sets password → logs into dayhome portal → sees dashboard with key metrics → manages rooms.                      |
 
 ### Backend Expectations
 
-- Dayhome module: approval workflow, status machine (PENDING â†’ ACTIVE/REJECTED â†’ SUSPENDED)
-- License document upload to R2/S3
-- Capacity validation: cannot set room capacity below current enrollment count
-- Events emitted: `dayhome.approved`, `dayhome.suspended`
+- API intake webhook (`POST /api/v1/dayhomes/intake`): HMAC signature verification, idempotency key dedup, field mapping, create as `ACTIVE`
+- Dayhome status machine: `ACTIVE ↔ SUSPENDED ↔ CLOSED` (no PENDING/DRAFT — dayhomes arrive pre-approved)
+- Room capacity enforcement
+- Welcome email via BullMQ on successful intake
+- Agency liaison assignment
+- Events emitted: `dayhome.intaken`, `dayhome.suspended`, `dayhome.activated`, `dayhome.closed`
 
 ### Frontend Expectations
 
-- Dayhome registration form (multi-step: info â†’ license â†’ rooms)
-- Dayhome dashboard for owners (daily snapshot)
-- Admin dayhome list with status badges, approve/reject buttons
-- Room management page with capacity indicator bar
+- Web Admin: dayhome list with status filters, dayhome detail (liaison, status mgmt), room management, intake log
+- Web Dayhome (new portal): scaffold Next.js 14 app, login page, dashboard with metrics, room management
+- No registration form (dayhomes arrive via API, not manual entry)
+- No approve/reject UI (handled by external portal)
 
 ---
 
@@ -404,11 +409,11 @@
 
 ### Replacement Documents
 
-| Document | File |
-|---|---|
-| System Architecture & Workflows | `SYSTEM_GUIDE.md` |
-| Corrected Sprint Roadmap | `SPRINT_ROADMAP.md` |
-| Developer Setup Guide | `DEVELOPMENT_GUIDE.md` |
+| Document                        | File                   |
+| ------------------------------- | ---------------------- |
+| System Architecture & Workflows | `SYSTEM_GUIDE.md`      |
+| Corrected Sprint Roadmap        | `SPRINT_ROADMAP.md`    |
+| Developer Setup Guide           | `DEVELOPMENT_GUIDE.md` |
 
 ### Key Corrections
 
@@ -419,4 +424,4 @@
 5. Government submission flow added to reporting
 6. Curriculum/portfolios/meal plans deferred to P3
 
-*This file retained for reference only.*
+_This file retained for reference only._

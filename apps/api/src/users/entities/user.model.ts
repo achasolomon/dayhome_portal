@@ -11,7 +11,7 @@ export enum UserRole {
   GOVERNMENT = 'GOVERNMENT',
 }
 
-@Table({ tableName: 'users', timestamps: true })
+@Table({ tableName: 'users', timestamps: true, paranoid: true })
 export class User extends Model<User> {
   @Column({
     type: DataType.UUID,
@@ -48,6 +48,9 @@ export class User extends Model<User> {
   @Column({ type: DataType.STRING(100) })
   declare lastName: string;
 
+  @Column({ type: DataType.STRING(20) })
+  declare phone: string;
+
   @Column({ type: DataType.JSONB, defaultValue: [] })
   declare permissions: string[];
 
@@ -65,4 +68,7 @@ export class User extends Model<User> {
 
   @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   declare updatedAt: Date;
+
+  @Column({ type: DataType.DATE })
+  declare deletedAt: Date | null;
 }

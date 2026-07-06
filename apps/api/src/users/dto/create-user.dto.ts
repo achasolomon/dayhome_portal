@@ -27,6 +27,26 @@ export class CreateUserDto {
   @MinLength(8)
   password!: string;
 
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  organizationId?: string;
+
   @ApiProperty({ enum: ROLES, example: 'ORG_ADMIN', required: false })
   @IsOptional()
   @IsIn(ROLES)

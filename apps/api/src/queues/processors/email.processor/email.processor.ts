@@ -8,14 +8,28 @@ export class EmailProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<{ email: string }>): Promise<void> {
-    const { email } = job.data;
+  async process(
+    job: Job<{ email: string; token?: string; organizationId?: string }>,
+  ): Promise<void> {
+    const { email, token } = job.data;
 
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'BullMQ Test Email',
-      text: 'Congratulations! BullMQ and Mailpit are working.',
-    });
+    switch (job.name) {
+      case 'send-invite': {
+        const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/accept-invite?token=${token}`;
+        await this.mailerService.sendMail({
+          to: email,
+          subject: "You've been invited to join",
+          text: `You have been invited to join. Click the link to accept: ${inviteLink}`,
+        });
+        break;
+      }
+      default:
+        await this.mailerService.sendMail({
+          to: email,
+          subject: 'BullMQ Test Email',
+          text: 'Congratulations! BullMQ and Mailpit are working.',
+        });
+    }
 
     console.log(`Email sent to ${email}`);
   }

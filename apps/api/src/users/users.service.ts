@@ -13,10 +13,16 @@ export class UsersService {
 
   async create(dto: CreateUserDto): Promise<User> {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-    return this.userModel.create({
+    const data = {
       email: dto.email,
       password: hashedPassword,
-    } as unknown as User);
+      firstName: dto.firstName ?? null,
+      lastName: dto.lastName ?? null,
+      phone: dto.phone ?? null,
+      role: dto.role ?? 'ORG_MANAGER',
+      organizationId: dto.organizationId ?? null,
+    };
+    return this.userModel.create(data as unknown as User);
   }
 
   async findByEmail(email: string): Promise<User | null> {

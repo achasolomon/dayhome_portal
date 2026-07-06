@@ -18,6 +18,9 @@ export class UserDto {
   lastName?: string;
 
   @ApiProperty()
+  phone?: string;
+
+  @ApiProperty()
   organizationId?: string;
 
   @ApiProperty()
@@ -39,6 +42,7 @@ export class UserDto {
       role: user.role,
       firstName: user.firstName,
       lastName: user.lastName,
+      phone: user.phone,
       organizationId: user.organizationId,
       dayhomeId: user.dayhomeId,
       permissions: user.permissions,
