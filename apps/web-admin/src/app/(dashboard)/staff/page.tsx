@@ -147,24 +147,24 @@ export default function StaffPage() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-l-4 border-l-primary shadow-sm">
+        <Card className="shadow-sm">
           <CardContent className="flex items-center justify-between py-4">
             <div>
               <p className="text-sm text-muted-foreground">Active Staff</p>
               <p className="text-3xl font-bold">{loading ? '—' : staff.length}</p>
             </div>
-            <Users className="h-8 w-8 text-primary/40" />
+            <Users className="h-8 w-8 text-muted-foreground/40" />
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-amber-500 shadow-sm">
+        <Card className="shadow-sm">
           <CardContent className="flex items-center justify-between py-4">
             <div>
               <p className="text-sm text-muted-foreground">Pending Invitations</p>
-              <p className="text-3xl font-bold text-amber-600">
+              <p className="text-3xl font-bold">
                 {loading ? '—' : pendingInvitations.length}
               </p>
             </div>
-            <Clock className="h-8 w-8 text-amber-500/40" />
+            <Clock className="h-8 w-8 text-muted-foreground/40" />
           </CardContent>
         </Card>
       </div>
@@ -234,12 +234,13 @@ export default function StaffPage() {
                     <p className="truncate text-xs text-muted-foreground">{member.email}</p>
                   </div>
                   <Badge
+                    variant="secondary"
                     className={
                       member.role === 'ORG_ADMIN'
-                        ? 'bg-purple-100 text-purple-700'
+                        ? 'bg-primary/10 text-primary'
                         : member.role === 'ORG_MANAGER'
-                        ? 'bg-teal-100 text-teal-700'
-                        : 'bg-gray-100 text-gray-700'
+                        ? 'bg-muted-foreground/10 text-muted-foreground'
+                        : ''
                     }
                   >
                     {member.role.replace(/_/g, ' ')}
@@ -260,8 +261,8 @@ export default function StaffPage() {
                     key={inv.id}
                     className="flex items-center gap-4 rounded-lg border border-dashed bg-white/50 px-5 py-3"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
-                      <Clock className="h-5 w-5 text-amber-600" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                      <Clock className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{inv.email}</p>
@@ -269,7 +270,7 @@ export default function StaffPage() {
                         Expires {new Date(inv.expiresAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <Badge variant="secondary" className="bg-amber-100 text-amber-700">
+                    <Badge variant="outline">
                       Pending
                     </Badge>
                   </div>

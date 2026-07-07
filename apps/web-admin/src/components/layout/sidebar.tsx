@@ -52,15 +52,15 @@ function NavItemLink({ item, isActive, collapsed }: { item: NavItem; isActive: b
         'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
         collapsed ? 'justify-center' : '',
         isActive
-          ? 'bg-golden-100 text-golden-800'
-          : 'text-sidebar-foreground hover:bg-golden-50 hover:text-golden-700',
+          ? 'bg-white/10 text-white'
+          : 'text-sidebar-foreground hover:bg-white/5 hover:text-white',
       )}
       title={collapsed ? item.label : undefined}
     >
       {item.icon && iconMap[item.icon]}
       {!collapsed && <span className="flex-1">{item.label}</span>}
       {!collapsed && item.badge != null && (
-        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-golden px-1.5 text-[10px] font-bold text-black">
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-white/15 px-1.5 text-[10px] font-medium text-white/80">
           {item.badge}
         </span>
       )}
@@ -84,8 +84,8 @@ function NavItemWrapper({ item, pathname, collapsed, depth = 0 }: { item: NavIte
         className={cn(
           'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
           isActive
-            ? 'bg-golden-100 text-golden-800'
-            : 'text-sidebar-foreground hover:bg-golden-50 hover:text-golden-700',
+            ? 'bg-white/10 text-white'
+            : 'text-sidebar-foreground hover:bg-white/5 hover:text-white',
         )}
       >
         {item.icon && iconMap[item.icon]}
@@ -150,7 +150,7 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
 
         <div className="border-t border-sidebar-border p-2 space-y-0.5">
           <button
-            className="flex w-full items-center justify-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-golden-50 hover:text-golden-700"
+            className="flex w-full items-center justify-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-white/5 hover:text-white"
             title="Notifications"
           >
             <Bell className="h-5 w-5" />
@@ -159,7 +159,7 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
           <Link
             href="/audit-log"
             className={cn(
-              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-golden-50 hover:text-golden-700',
+              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-white/5 hover:text-white',
               collapsed ? 'justify-center' : '',
             )}
             title="Audit Log"
@@ -168,7 +168,7 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
             {!collapsed && <span className="flex-1">Audit Log</span>}
           </Link>
           <button
-            className="flex w-full items-center justify-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-golden-50 hover:text-golden-700"
+            className="flex w-full items-center justify-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-white/5 hover:text-white"
             title="Logout"
           >
             <LogOut className="h-5 w-5" />
