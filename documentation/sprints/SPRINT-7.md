@@ -1,7 +1,41 @@
-﻿# Sprint 7 â€” Document & Compliance Management
+﻿# Sprint 7 — Document & Compliance Management
 
-**Duration:** Week 15â€“16  
+**Duration:** Week 15–16  
 **Goal:** Document upload and storage, expiry tracking, automated renewal alerts, compliance monitoring and audit support.
+
+## IN SCOPE
+
+| ID    | Deliverable                                                    | Backend | Frontend |
+| ----- | -------------------------------------------------------------- | ------- | -------- |
+| S7-01 | Document upload with ClamAV virus scanning, stored in R2/S3    | ✅      | ✅       |
+| S7-02 | Expiry tracking with color-coded status (green/amber/red)      | ✅      | ✅       |
+| S7-03 | Automated expiry alerts via BullMQ (60/30/14/7 days)           | ✅      | —        |
+| S7-04 | Document renewal with version history                          | ✅      | ✅       |
+| S7-05 | Compliance dashboard per dayhome                               | ✅      | ✅       |
+| S7-06 | Government read-only access (watermarked preview, no download) | ✅      | ✅       |
+
+## NOT IN SCOPE
+
+- ❌ No messaging or announcements (Sprint 8)
+- ❌ No reporting & analytics (Sprint 9)
+- ❌ No mobile apps (Sprint 10)
+- ❌ No real document signing / e-signature (incident reports use checkbox acknowledgment)
+- ❌ No OCR or document content analysis
+
+## STANDARD PRACTICES (Mandatory)
+
+- **File validation**: MIME type checked server-side (not just extension); max 10MB; allowed: PDF, JPG, PNG
+- **Virus scanning**: ClamAV scan on upload (fail-open for dev); quarantined if infected
+- **Encryption**: Files encrypted at rest in R2; access URLs time-limited (signed URLs, 15 min expiry)
+- **Document status machine**: `ACTIVE → EXPIRING_SOON → EXPIRED | SUPERSEDED | REJECTED`
+- **Compliance rules**: Configurable per organization (which document types are "required")
+- **Data retention**: Documents retained 7 years after expiry; hard-delete after retention period
+- **Government role**: Read-only; no download without audit trail; watermarked preview
+- **`C-S-R pattern`**: Controller → Service → Repository
+- **DTOs**: `class-validator` on backend; Zod on frontend
+- **i18n**: Every user-visible string uses `useTranslation()` + `t('key')`
+- **Migrations**: Every schema change has a migration
+- **Event-driven**: `document.expiring`, `document.expired`, `document.uploaded` emitted
 
 ---
 

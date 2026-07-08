@@ -7,7 +7,11 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-const STAFF_ROLES = ['ORG_ADMIN', 'ORG_MANAGER', 'BILLING_ONLY'] as const;
+export const STAFF_ROLES = [
+  'ORG_ADMIN',
+  'ORG_MANAGER',
+  'BILLING_ONLY',
+] as const;
 
 export class InviteStaffDto {
   @ApiProperty({ example: 'john@organization.ca' })
@@ -30,4 +34,9 @@ export class InviteStaffDto {
   @IsString()
   @MinLength(1)
   lastName?: string;
+
+  @ApiProperty({ example: '+1-403-555-0123', required: false })
+  @IsOptional()
+  @IsString()
+  phone?: string;
 }

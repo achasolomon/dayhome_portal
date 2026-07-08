@@ -29,11 +29,11 @@
     --ring: 262 35% 38%;
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 9%;
-    --sidebar-foreground: 0 0% 55%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 92%;
-    --sidebar-border: 0 0% 13%;
+    --sidebar-background: 262 35% 38%;
+    --sidebar-foreground: 262 20% 85%;
+    --sidebar-accent: 262 28% 50%;
+    --sidebar-accent-foreground: 262 35% 18%;
+    --sidebar-border: 262 25% 44%;
   }
 
   * {
@@ -56,4 +56,18 @@
   .scrollbar-hidden::-webkit-scrollbar {
     display: none;
   }
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
 }

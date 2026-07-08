@@ -49,10 +49,10 @@ function NavItemLink({ item, isActive, collapsed }: { item: NavItem; isActive: b
     <Link
       href={item.href}
       className={cn(
-        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all',
         collapsed ? 'justify-center' : '',
         isActive
-          ? 'bg-white/10 text-white'
+          ? 'bg-white/15 text-white shadow-sm'
           : 'text-sidebar-foreground hover:bg-white/5 hover:text-white',
       )}
       title={collapsed ? item.label : undefined}
@@ -60,7 +60,7 @@ function NavItemLink({ item, isActive, collapsed }: { item: NavItem; isActive: b
       {item.icon && iconMap[item.icon]}
       {!collapsed && <span className="flex-1">{item.label}</span>}
       {!collapsed && item.badge != null && (
-        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-white/15 px-1.5 text-[10px] font-medium text-white/80">
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-golden/80 px-1.5 text-[10px] font-medium text-white">
           {item.badge}
         </span>
       )}
@@ -82,9 +82,9 @@ function NavItemWrapper({ item, pathname, collapsed, depth = 0 }: { item: NavIte
       <button
         onClick={() => setExpanded(!expanded)}
         className={cn(
-          'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+          'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all',
           isActive
-            ? 'bg-white/10 text-white'
+            ? 'bg-white/15 text-white shadow-sm'
             : 'text-sidebar-foreground hover:bg-white/5 hover:text-white',
         )}
       >
@@ -93,7 +93,7 @@ function NavItemWrapper({ item, pathname, collapsed, depth = 0 }: { item: NavIte
         {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
       </button>
       {expanded && item.children && (
-        <div className="ml-8 mt-1 space-y-1 border-l pl-3">
+        <div className="ml-8 mt-1 space-y-1 border-l border-sidebar-border/50 pl-3">
           {item.children.map((child) => (
             <NavItemWrapper key={child.href} item={child} pathname={pathname} collapsed={collapsed} depth={depth + 1} />
           ))}
@@ -119,23 +119,25 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
       )}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex flex-col border-r bg-sidebar-background transition-all duration-200 lg:static lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex flex-col border-r border-sidebar-border bg-sidebar-background transition-all duration-200 lg:static lg:translate-x-0',
           collapsed ? 'w-16' : 'w-60',
           open ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className={cn('flex h-14 items-center border-b border-sidebar-border', collapsed ? 'justify-center' : 'gap-2 px-4')}>
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-base font-bold text-primary-foreground shadow-sm">
-            S
-          </div>
-          {!collapsed && <span className="text-base font-semibold text-white">Spiced</span>}
+        {/* Logo area */}
+        <div className={cn('flex h-14 items-center border-b border-sidebar-border', collapsed ? 'justify-center' : 'gap-3 px-4')}>
+          <img src="/assets/logo.png" alt="SPICE'd" className="h-8 w-8 object-contain" />
+          {!collapsed && (
+            <span className="text-base font-bold tracking-tight text-white">SPICE&apos;d</span>
+          )}
         </div>
 
-        <nav className="flex-1 overflow-y-auto scrollbar-hidden p-2 space-y-5">
+        {/* Navigation groups */}
+        <nav className="scrollbar-hidden flex-1 space-y-5 overflow-y-auto p-2">
           {navGroups.map((group) => (
             <div key={group.label}>
               {!collapsed && (
-                <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/60">
+                <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/50">
                   {group.label}
                 </p>
               )}
@@ -148,32 +150,35 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
           ))}
         </nav>
 
-        <div className="border-t border-sidebar-border p-2 space-y-0.5">
-          <button
-            className="flex w-full items-center justify-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-white/5 hover:text-white"
-            title="Notifications"
-          >
-            <Bell className="h-5 w-5" />
-            {!collapsed && <span className="flex-1 text-left">Notifications</span>}
-          </button>
-          <Link
-            href="/audit-log"
-            className={cn(
-              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-white/5 hover:text-white',
-              collapsed ? 'justify-center' : '',
-            )}
-            title="Audit Log"
-          >
-            <ClipboardList className="h-5 w-5" />
-            {!collapsed && <span className="flex-1">Audit Log</span>}
-          </Link>
-          <button
-            className="flex w-full items-center justify-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-white/5 hover:text-white"
-            title="Logout"
-          >
-            <LogOut className="h-5 w-5" />
-            {!collapsed && <span className="flex-1 text-left">Logout</span>}
-          </button>
+        {/* Bottom actions */}
+        <div className="border-t border-sidebar-border p-2">
+          <div className="space-y-0.5">
+            <button
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-all hover:bg-white/5 hover:text-white"
+              title={collapsed ? 'Notifications' : undefined}
+            >
+              <Bell className="h-5 w-5 shrink-0" />
+              {!collapsed && <span className="flex-1 text-left">Notifications</span>}
+            </button>
+            <Link
+              href="/audit-log"
+              className={cn(
+                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-all hover:bg-white/5 hover:text-white',
+                collapsed ? 'justify-center' : '',
+              )}
+              title={collapsed ? 'Audit Log' : undefined}
+            >
+              <ClipboardList className="h-5 w-5 shrink-0" />
+              {!collapsed && <span className="flex-1">Audit Log</span>}
+            </Link>
+            <button
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-all hover:bg-white/5 hover:text-white"
+              title={collapsed ? 'Logout' : undefined}
+            >
+              <LogOut className="h-5 w-5 shrink-0" />
+              {!collapsed && <span className="flex-1 text-left">Logout</span>}
+            </button>
+          </div>
         </div>
       </aside>
     </>

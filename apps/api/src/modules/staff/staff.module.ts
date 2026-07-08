@@ -4,11 +4,16 @@ import { StaffController } from './staff.controller';
 import { StaffService } from './staff.service';
 import { StaffRepository } from './staff.repository';
 import { QueuesModule } from '../../queues/queues.module';
+import { AuthModule } from '../../auth/auth.module';
 import { Invitation } from './entities/staff.entity';
 import { User } from './entities/staff.entity';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Invitation, User]), QueuesModule],
+  imports: [
+    SequelizeModule.forFeature([Invitation, User]),
+    QueuesModule,
+    AuthModule,
+  ],
   controllers: [StaffController],
   providers: [StaffService, StaffRepository],
   exports: [StaffService],

@@ -5,6 +5,40 @@
 
 ---
 
+## IN SCOPE
+
+| ID    | Deliverable                                                 | Backend | Frontend |
+| ----- | ----------------------------------------------------------- | ------- | -------- |
+| S9-01 | Attendance report (daily/monthly/range) with CSV/PDF export | âœ…     | âœ…      |
+| S9-02 | Financial report (revenue, AR aging, subsidy impact)        | âœ…     | âœ…      |
+| S9-03 | Compliance report (document status, expiry overview)        | âœ…     | âœ…      |
+| S9-04 | Enrollment report (capacity, waitlist trends)               | âœ…     | âœ…      |
+| S9-05 | Admin dashboard with KPI cards                              | âœ…     | âœ…      |
+| S9-06 | Government read-only endpoints (aggregate data only)        | âœ…     | âœ…      |
+
+## NOT IN SCOPE
+
+- âŒ No mobile apps (Sprint 10)
+- âŒ No advanced analytics / ML predictions
+- âŒ No custom report builder (pre-defined report types only)
+- âŒ No real-time dashboard streaming (polling-based refresh)
+- âŒ No third-party BI tool integration (Tableau, PowerBI, Metabase)
+
+## STANDARD PRACTICES (Mandatory)
+
+- **Query performance**: Materialized views for aggregate data; refresh schedule daily at 02:00
+- **Caching**: Redis: dashboard data TTL 5 min, detailed reports TTL 1 h
+- **Export**: Large CSV exports streamed; PDF generated server-side with pagination
+- **Government data**: Only aggregate data exposed (no child names, no parent names, no financial details)
+- **Chart rendering**: Recharts with responsive containers; loading skeleton during data fetch
+- **Date range**: Default to current month; max range 12 months (performance limit)
+- **Permissions**: @Roles(Role.ORG_ADMIN) for internal reports; @Roles(Role.GOVERNMENT) for gov reports
+- **No N+1**: All report queries use aggregation with â€” no per-child/per-dayhome loops
+- **C-S-R pattern**: Controller â†’ Service â†’ Repository
+- **DTOs**: class-validator on backend; Zod on frontend
+- **i18n**: Every user-visible string uses useTranslation() + ('key')
+- **Migrations**: Materialized views tracked in migrations
+
 ## User Stories
 
 | ID    | Story                                                                                                                                             | Acceptance Criteria                                                                                                                              |

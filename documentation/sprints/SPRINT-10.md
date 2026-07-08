@@ -3,7 +3,42 @@
 **Duration:** Week 21â€“24 (4 weeks)  
 **Goal:** React Native (Expo) apps for educators and parents; internationalization (EN/FR); WCAG 2.1 AA accessibility; performance optimization; final QA.
 
----
+## IN SCOPE
+
+| ID     | Deliverable                                                                  | Backend | Frontend |
+| ------ | ---------------------------------------------------------------------------- | ------- | -------- |
+| S10-01 | Educator mobile app (Expo): check-in/out, daily board, activities, incidents | ✅      | ✅       |
+| S10-02 | Parent mobile app (Expo): notifications, child feed, messaging, invoices     | ✅      | ✅       |
+| S10-03 | Offline check-in/out (WatermelonDB)                                          | ✅      | ✅       |
+| S10-04 | i18n: French locale complete (all strings translated)                        | â€”     | ✅       |
+| S10-05 | WCAG 2.1 AA accessibility audit + remediation                                | â€”     | ✅       |
+| S10-06 | Performance optimization (LCP, FID, API P95)                                 | ✅      | ✅       |
+| S10-07 | Push notification registration (FCM/APNs)                                    | ✅      | ✅       |
+
+## NOT IN SCOPE
+
+- ❌ Curriculum planning, developmental portfolios, meal plans (deferred to P3)
+- ❌ No new backend feature modules â€” only mobile-optimized endpoints + sync
+- ❌ No Android/iOS-specific native modules (Expo managed workflow only)
+- ❌ No real SMS gateway (Twilio) â€” mock remains; real integration if time permits
+- ❌ No Apple Watch / Android Wear companion apps
+
+## STANDARD PRACTICES (Mandatory)
+
+- **Mobile endpoints**: Lighter response payloads; batch endpoints for offline sync
+- **Sync**: `POST /sync` accepts batch of offline records; validates each; returns conflicts
+- **Image optimization**: Server-side resize (thumbnail 150px, mobile 600px); WebP format
+- **Rate limiting**: Mobile endpoints 300 req/min vs web 100 req/min
+- **API versioning**: `/api/v1/` prefix maintained; breaking changes â†’ `/api/v2/`
+- **Offline-first**: WatermelonDB cache; sync queue when online; last-write-wins conflict resolution
+- **Biometric auth**: `expo-local-authentication` for PIN/FaceID/TouchID login
+- **i18n**: `react-i18next` with locale detection; French locale complete; `Intl.*` formatting
+- **Accessibility**: Keyboard nav, focus indicators, 4.5:1 contrast, alt text, semantic HTML, aria landmarks, screen reader tested
+- **Performance**: LCP < 2.5s, FID < 100ms, API P95 < 300ms, mobile cold start < 2s
+- **`C-S-R pattern`**: Controller â†’ Service â†’ Repository (backend)
+- **DTOs**: `class-validator` on backend; Zod on frontend
+- **i18n**: Every user-visible string uses `useTranslation()` + `t('key')`
+- **Migrations**: Every schema change has a migration
 
 ## User Stories
 

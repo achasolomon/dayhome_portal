@@ -1,9 +1,41 @@
-﻿# Sprint 6 â€” Billing & Finance
+﻿# Sprint 6 — Billing & Finance
 
-**Duration:** Week 13â€“14  
+**Duration:** Week 13–14  
 **Goal:** Invoice generation from attendance, payment tracking, subsidy management, financial reporting.
 
----
+## IN SCOPE
+
+| ID    | Deliverable                                                   | Backend | Frontend |
+| ----- | ------------------------------------------------------------- | ------- | -------- |
+| S6-01 | Invoice auto-generation from attendance (BullMQ weekly job)   | ✅      | ✅       |
+| S6-02 | Payment tracking (mock or Stripe sandbox)                     | ✅      | ✅       |
+| S6-03 | Subsidy management (percentage or fixed amount, auto-applied) | ✅      | ✅       |
+| S6-04 | Financial reports (revenue, AR aging, subsidy totals)         | ✅      | ✅       |
+| S6-05 | Credits & refunds management                                  | ✅      | ✅       |
+| S6-06 | Parent invoice view + payment history                         | ✅      | ✅       |
+
+## NOT IN SCOPE
+
+- ❌ No real payment gateway integration (mock or Stripe sandbox only)
+- ❌ No document management (Sprint 7)
+- ❌ No messaging (Sprint 8)
+- ❌ No mobile apps (Sprint 10)
+- ❌ No tax reporting (T4A, GST/HST filings)
+- ❌ No direct deposit / payroll integration
+
+## STANDARD PRACTICES (Mandatory)
+
+- **Decimal precision**: All monetary values stored as `DECIMAL(10,2)` in PostgreSQL — never `Float`
+- **Invoice status machine**: `DRAFT → FINALIZED → SENT → PAID | OVERDUE | CANCELLED`
+- **Payment matching**: Payments matched to invoices via `invoiceId`; partial payments supported
+- **Subsidy audit**: All subsidy changes logged with effective date range
+- **Data retention**: Invoices/payments retained 7 years (CRA/IRS requirement)
+- **Security**: Financial data visible only to `ORG_ADMIN`, `DAYHOME_OWNER`, and the parent-family
+- **Performance**: Invoice list paginated; financial reports use materialized views
+- **`C-S-R pattern`**: Controller → Service → Repository
+- **DTOs**: `class-validator` on backend; Zod on frontend
+- **i18n**: Every user-visible string uses `useTranslation()` + `t('key')`
+- **Migrations**: Every schema change has a migration
 
 ## User Stories
 

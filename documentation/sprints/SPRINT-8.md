@@ -1,9 +1,42 @@
-﻿# Sprint 8 â€” Messaging & Notifications
+﻿# Sprint 8 — Messaging & Notifications
 
-**Duration:** Week 17â€“18  
+**Duration:** Week 17–18  
 **Goal:** In-app messaging, announcements, push/email/SMS notifications, activity logs, incident reports.
 
----
+## IN SCOPE
+
+| ID    | Deliverable                                                    | Backend | Frontend |
+| ----- | -------------------------------------------------------------- | ------- | -------- |
+| S8-01 | Thread-based messaging (parent ↔ educator) with read receipts  | ✅      | ✅       |
+| S8-02 | Announcement broadcasts (admin → all parents)                  | ✅      | ✅       |
+| S8-03 | Push notifications (FCM/APNs/Web Push) + in-app Socket.io      | ✅      | ✅       |
+| S8-04 | Activity logging per child (meals, naps, diaper, mood, photos) | ✅      | ✅       |
+| S8-05 | Incident reports with parent e-signature acknowledgment        | ✅      | ✅       |
+| S8-06 | Notification preferences (channel + type toggles per user)     | ✅      | ✅       |
+
+## NOT IN SCOPE
+
+- ❌ No reporting & analytics (Sprint 9)
+- ❌ No mobile apps (Sprint 10)
+- ❌ No real SMS gateway integration (mock for now; Twilio in Sprint 10)
+- ❌ No group messaging or chat rooms (1-on-1 only)
+- ❌ No AI-based activity suggestions
+
+## STANDARD PRACTICES (Mandatory)
+
+- **Message delivery**: All messages go through BullMQ queue; retry 3× with exponential backoff
+- **Notification channel routing**: Check user's `NotificationPreference` before sending; fallback to in-app
+- **Photo in activities**: Upload → resize (3 sizes) → store in R2 → return URLs; max 5 photos per entry
+- **Incident severity**: Critical incidents trigger SMS to emergency contacts + owner immediately
+- **Parent acknowledgment**: Incident reports require digital acknowledgment (checkbox + timestamp)
+- **Data retention**: Messages retained 2 years; activities 1 year; incidents 7 years
+- **Privacy**: Parents can only message educators of their enrolled dayhome
+- **Rate limit**: Messaging 50 msgs/user/hr; announcements 5/day per dayhome
+- **`C-S-R pattern`**: Controller → Service → Repository
+- **DTOs**: `class-validator` on backend; Zod on frontend
+- **i18n**: Every user-visible string uses `useTranslation()` + `t('key')`
+- **Migrations**: Every schema change has a migration
+- **Socket.io**: Real-time badge counts, message delivery, notification alerts
 
 ## User Stories
 

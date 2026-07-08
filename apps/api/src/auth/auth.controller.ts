@@ -11,8 +11,12 @@ import {
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { UsersService } from '../users/users.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { LoginThrottleGuard } from './guards/login-throttle.guard';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserDto } from '../users/dto/user.dto';
 import { CurrentUser } from './current-user.decorator';
@@ -34,20 +38,26 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
+    private readonly loginThrottle: LoginThrottleGuard,
   ) {}
 
   @Post('login')
+  @UseGuards(LoginThrottleGuard)
   @ApiOperation({ summary: 'Log in with email and password' })
   @ApiResponse({ status: 201, description: 'Authentication tokens returned' })
   async login(
     @Body() dto: LoginUserDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
+    const ip = req.ip || req.connection?.remoteAddress || 'unknown';
     const user = await this.authService.validateUser(dto.email, dto.password);
     if (!user) {
+      await this.loginThrottle.recordFailure(ip);
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    await this.loginThrottle.clearAttempts(ip);
     const tokens = await this.authService.login(user);
 
     res.cookie(REFRESH_COOKIE, tokens.refreshToken, COOKIE_OPTIONS);
@@ -102,5 +112,34 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Authenticated user returned' })
   me(@CurrentUser() user: User): UserDto {
     return UserDto.fromModel(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('change-password')
+  @ApiOperation({ summary: 'Change password for authenticated user' })
+  @ApiResponse({ status: 201, description: 'Password changed' })
+  async changePassword(
+    @CurrentUser() user: User,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(
+      user.id,
+      dto.oldPassword,
+      dto.newPassword,
+    );
+  }
+
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Request a password reset email' })
+  @ApiResponse({ status: 201, description: 'Reset link sent if email exists' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset password using a reset token' })
+  @ApiResponse({ status: 201, description: 'Password reset successfully' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.token, dto.password);
   }
 }

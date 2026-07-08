@@ -23,6 +23,15 @@ export class EmailProcessor extends WorkerHost {
         });
         break;
       }
+      case 'send-password-reset': {
+        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
+        await this.mailerService.sendMail({
+          to: email,
+          subject: 'Reset your password',
+          text: `Click the link to reset your password: ${resetLink}. This link expires in 1 hour.`,
+        });
+        break;
+      }
       default:
         await this.mailerService.sendMail({
           to: email,

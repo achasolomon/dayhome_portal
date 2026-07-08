@@ -24,15 +24,14 @@ export class OrganizationResponseDto {
   deletedAt?: Date;
 
   static from(org: Organization): OrganizationResponseDto {
-    const raw = org as unknown as Record<string, Date | undefined>;
     return {
       id: org.id,
       name: org.name,
       email: org.email,
       status: org.status,
-      createdAt: raw.createdAt as Date,
-      updatedAt: raw.updatedAt as Date,
-      deletedAt: raw.deletedAt,
+      createdAt: org.createdAt as Date,
+      updatedAt: org.updatedAt as Date,
+      deletedAt: org.deletedAt as Date | undefined,
     };
   }
 }

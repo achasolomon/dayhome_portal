@@ -5,6 +5,52 @@
 
 ---
 
+## IN SCOPE
+
+| ID    | Item                                                                             | Status     |
+| ----- | -------------------------------------------------------------------------------- | ---------- |
+| S0-01 | Monorepo scaffold (pnpm workspaces + Turborepo)                                  | ✅ Done    |
+| S0-02 | All 10+ Sequelize models + first migration + seed                                | ✅ Done    |
+| S0-03 | NestJS API scaffold with auth module (JWT dual-token login, refresh)             | ✅ Done    |
+| S0-04 | `shared-types` package with `ApiResponse<T>`, `PaginatedResponse<T>`, `ApiError` | ✅ Done    |
+| S0-05 | UI Kit (shadcn/ui wrappers) in `packages/ui-kit`                                 | ✅ Done    |
+| S0-06 | Web Admin Next.js 14 app (App Router, Tailwind, Zustand, axios, TanStack Query)  | ✅ Done    |
+| S0-07 | Docker Compose (Postgres, Redis, MinIO, ClamAV, Mailpit, Prometheus, Grafana)    | ✅ Done    |
+| S0-08 | Infra config (Prometheus, Grafana dashboards, ClamAV scanning)                   | ✅ Done    |
+| S0-09 | Seed script (org + super admin user)                                             | ✅ Done    |
+| S0-10 | ESLint, Prettier, tsconfig.base.json                                             | ✅ Done    |
+| S0-11 | i18n scaffold (`react-i18next`, locale detection, `t()` utility)                 | 🔷 Partial |
+| S0-12 | a11y ESLint plugin (`eslint-plugin-jsx-a11y`)                                    | ⬜ Pending |
+| S0-13 | Queue Dashboard (Bull Board UI at `/api/v1/admin/queues`)                        | ⬜ Pending |
+| S0-14 | AuthService unit tests + auth endpoint integration tests                         | ⬜ Pending |
+
+## NOT IN SCOPE (Explicit Exclusions)
+
+- No feature modules beyond auth (no Dayhome, Educator, Family, Child, Attendance, Billing, Document, Message, Report modules)
+- No frontend pages beyond auth pages (login, register, forgot-password, reset-password)
+- No mobile apps
+- No i18n completion — only scaffold (all new strings use translation keys from Sprint 1 onward)
+- No a11y completion — only ESLint plugin (follow WCAG patterns from Sprint 1 onward)
+
+## STANDARD PRACTICES (Set in Sprint 0, Mandatory from Sprint 1)
+
+- **TypeScript strict** — no `any`, no `@ts-ignore`, no `as unknown` casts (test mocks exempted)
+- **Named exports only** — no `export default`
+- **Conventional Commits**: `feat/<SCOPE>-<id>-description`
+- **C-S-R pattern**: Controller → Service → Repository for all API modules
+- **Frontend**: Zod validation + React Hook Form for forms
+- **Backend**: class-validator DTOs for request validation
+- **Standardized envelope**: `{ success, data, meta }` on all API responses
+- **Error codes**: Defined in `shared-constants` (e.g., `DAYHOME_NOT_FOUND`)
+- **Global pipes/filters/interceptors**: `ValidationPipe` (whitelist), `HttpExceptionFilter`, `TransformInterceptor`
+- **Rate limiting**: 100 req/min per IP (global), 5 login attempts/15 min per IP (auth-specific, Redis-backed)
+- **Auth infrastructure**: `JwtAuthGuard`, `RolesGuard`, `PermissionsGuard`, `@Roles()`, `@Permissions()` decorators
+- **Sequelize conventions**: `paranoid: true` for soft delete, `CreatedAt`/`UpdatedAt` columns, UUID primary keys
+- **API prefix**: `/api/v1/`
+- **CORS**: Configured for frontend URLs from env
+
+---
+
 ## Prerequisites (Install These First)
 
 | Tool                     | Version         | Why                                                                                     |

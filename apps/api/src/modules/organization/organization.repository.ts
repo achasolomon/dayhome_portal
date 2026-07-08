@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op, Order } from 'sequelize';
+import { Op, Order, CreationAttributes } from 'sequelize';
 import { Organization } from './entities/organization.entity';
 
 interface FindAllParams {
@@ -23,7 +23,7 @@ export class OrganizationRepository {
     email: string;
     status: string;
   }): Promise<Organization> {
-    return this.orgModel.create(data as unknown as Organization);
+    return this.orgModel.create(data as CreationAttributes<Organization>);
   }
 
   async findByEmail(
@@ -48,10 +48,13 @@ export class OrganizationRepository {
 
     if (status) where.status = status;
     if (search) {
-      where[Op.or as unknown as string] = [
-        { name: { [Op.iLike]: `%${search}%` } },
-        { email: { [Op.iLike]: `%${search}%` } },
-      ];
+      const searchClause = {
+        [Op.or]: [
+          { name: { [Op.iLike]: `%${search}%` } },
+          { email: { [Op.iLike]: `%${search}%` } },
+        ],
+      };
+      Object.assign(where, searchClause);
     }
 
     const { rows, count } = await this.orgModel.findAndCountAll({

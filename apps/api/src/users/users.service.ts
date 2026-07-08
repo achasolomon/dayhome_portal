@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { CreationAttributes } from 'sequelize';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.model';
@@ -22,7 +23,7 @@ export class UsersService {
       role: dto.role ?? 'ORG_MANAGER',
       organizationId: dto.organizationId ?? null,
     };
-    return this.userModel.create(data as unknown as User);
+    return this.userModel.create(data as CreationAttributes<User>);
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -31,5 +32,9 @@ export class UsersService {
 
   async findById(id: string): Promise<User | null> {
     return this.userModel.findByPk(id);
+  }
+
+  async findByResetToken(token: string): Promise<User | null> {
+    return this.userModel.findOne({ where: { resetToken: token } });
   }
 }

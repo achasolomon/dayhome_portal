@@ -63,6 +63,12 @@ export class User extends Model<User> {
   @Column({ type: DataType.TEXT })
   declare refreshToken: string;
 
+  @Column({ type: DataType.STRING(255), allowNull: true, unique: true })
+  declare resetToken: string | null;
+
+  @Column({ type: DataType.DATE, allowNull: true })
+  declare resetTokenExpiry: Date | null;
+
   @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   declare createdAt: Date;
 

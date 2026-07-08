@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op, Order } from 'sequelize';
+import { Op, Order, WhereOptions, CreationAttributes } from 'sequelize';
 import { Invitation } from './entities/staff.entity';
 import { User } from './entities/staff.entity';
 
@@ -20,17 +20,10 @@ export class StaffRepository {
     private readonly userModel: typeof User,
   ) {}
 
-  async createInvitation(data: {
-    email: string;
-    role: string;
-    organizationId: string;
-    token: string;
-    expiresAt: Date;
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-  }): Promise<Invitation> {
-    return this.invitationModel.create(data as unknown as Invitation);
+  async createInvitation(
+    data: CreationAttributes<Invitation>,
+  ): Promise<Invitation> {
+    return this.invitationModel.create(data);
   }
 
   async findPendingInvitationByEmail(
@@ -48,8 +41,32 @@ export class StaffRepository {
     });
   }
 
+  async findInvitationById(id: string): Promise<Invitation | null> {
+    return this.invitationModel.findByPk(id, { paranoid: false });
+  }
+
   async findInvitationByToken(token: string): Promise<Invitation | null> {
     return this.invitationModel.findOne({ where: { token }, paranoid: false });
+  }
+
+  async markInvitationCancelled(id: string): Promise<void> {
+    await this.invitationModel.update(
+      { status: 'CANCELLED' },
+      { where: { id } },
+    );
+  }
+
+  async markExpiredInvitations(): Promise<number> {
+    const [count] = await this.invitationModel.update(
+      { status: 'EXPIRED' },
+      {
+        where: {
+          status: 'PENDING',
+          expiresAt: { [Op.lt]: new Date() },
+        },
+      },
+    );
+    return count;
   }
 
   async markInvitationAccepted(id: string): Promise<void> {
@@ -62,14 +79,17 @@ export class StaffRepository {
   async findStaffByOrganization(params: FindStaffParams) {
     const { organizationId, search, page, limit } = params;
     const offset = (page - 1) * limit;
-    const where: Record<string, unknown> = { organizationId };
+    const where: WhereOptions = { organizationId };
 
     if (search) {
-      where[Op.or as unknown as string] = [
-        { email: { [Op.iLike]: `%${search}%` } },
-        { firstName: { [Op.iLike]: `%${search}%` } },
-        { lastName: { [Op.iLike]: `%${search}%` } },
-      ];
+      const searchClause = {
+        [Op.or]: [
+          { email: { [Op.iLike]: `%${search}%` } },
+          { firstName: { [Op.iLike]: `%${search}%` } },
+          { lastName: { [Op.iLike]: `%${search}%` } },
+        ],
+      };
+      Object.assign(where, searchClause);
     }
 
     const { rows, count } = await this.userModel.findAndCountAll({

@@ -16,7 +16,9 @@ import { InvitationResponseDto } from './dto/staff-response.dto';
 import { CheckInvitationDto } from './dto/check-invitation.dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
+import { PermissionsGuard } from '../../auth/permissions.guard';
 import { Roles } from '../../auth/roles.decorator';
+import { Permissions } from '../../auth/permissions.decorator';
 import { CurrentUser } from '../../auth/current-user.decorator';
 
 @ApiTags('Staff')
@@ -25,8 +27,9 @@ export class StaffController {
   constructor(private readonly staffService: StaffService) {}
 
   @Post('invite')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles('ORG_ADMIN')
+  @Permissions('staff.invite')
   @ApiOperation({ summary: 'Invite a staff member to an organization' })
   @ApiResponse({ status: 201, description: 'Invitation sent' })
   async invite(
@@ -37,9 +40,20 @@ export class StaffController {
     return InvitationResponseDto.from(invitation);
   }
 
-  @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('roles')
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles('ORG_ADMIN', 'ORG_MANAGER')
+  @Permissions('staff.list')
+  @ApiOperation({ summary: 'Get available staff roles' })
+  @ApiResponse({ status: 200, description: 'Staff roles' })
+  getRoles() {
+    return this.staffService.getRoles();
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  @Roles('ORG_ADMIN', 'ORG_MANAGER')
+  @Permissions('staff.list')
   @ApiOperation({ summary: 'List staff members for the current organization' })
   @ApiResponse({ status: 200, description: 'Staff list' })
   async listStaff(
@@ -47,6 +61,37 @@ export class StaffController {
     @CurrentUser('organizationId') organizationId: string,
   ) {
     return this.staffService.listStaff(organizationId, query);
+  }
+
+  @Post('invitations/:id/resend')
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  @Roles('ORG_ADMIN')
+  @Permissions('staff.invite')
+  @ApiOperation({ summary: 'Resend a pending invitation email' })
+  @ApiResponse({ status: 200, description: 'Invitation resent' })
+  async resendInvitation(
+    @Param('id') id: string,
+    @CurrentUser('organizationId') organizationId: string,
+  ): Promise<InvitationResponseDto> {
+    const invitation = await this.staffService.resendInvitation(
+      id,
+      organizationId,
+    );
+    return InvitationResponseDto.from(invitation);
+  }
+
+  @Post('invitations/:id/cancel')
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  @Roles('ORG_ADMIN')
+  @Permissions('staff.remove')
+  @ApiOperation({ summary: 'Cancel a pending invitation' })
+  @ApiResponse({ status: 200, description: 'Invitation cancelled' })
+  async cancelInvitation(
+    @Param('id') id: string,
+    @CurrentUser('organizationId') organizationId: string,
+  ): Promise<{ message: string }> {
+    await this.staffService.cancelInvitation(id, organizationId);
+    return { message: 'Invitation cancelled successfully.' };
   }
 
   @Get('invitation/:token')

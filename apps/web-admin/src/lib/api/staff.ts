@@ -39,6 +39,7 @@ export interface InviteStaffPayload {
   role: string;
   firstName?: string;
   lastName?: string;
+  phone?: string;
 }
 
 export interface CheckInvitationResult {
@@ -59,7 +60,27 @@ export interface AcceptInvitePayload {
   password: string;
 }
 
+export interface RoleOption {
+  value: string;
+  label: string;
+}
+
 export const staffApi = {
+  async cancelInvitation(id: string): Promise<{ message: string }> {
+    const response = await apiClient.post(`/staff/invitations/${id}/cancel`);
+    return response.data;
+  },
+
+  async resendInvitation(id: string): Promise<StaffInvitation> {
+    const response = await apiClient.post(`/staff/invitations/${id}/resend`);
+    return response.data;
+  },
+
+  async getRoles(): Promise<RoleOption[]> {
+    const response = await apiClient.get('/staff/roles');
+    return response.data;
+  },
+
   async invite(data: InviteStaffPayload): Promise<StaffInvitation> {
     const response = await apiClient.post('/staff/invite', data);
     return response.data;

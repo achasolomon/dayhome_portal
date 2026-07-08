@@ -1,9 +1,43 @@
-﻿# Sprint 3 â€” Educator Management
+﻿# Sprint 3 — Educator Management
 
-**Duration:** Week 7â€“8  
+**Duration:** Week 7–8  
 **Goal:** Educator profiles, shift scheduling, PTO/leave management, work hours tracking, performance monitoring.
 
 ---
+
+## IN SCOPE
+
+| ID    | Deliverable                                                        | Backend | Frontend |
+| ----- | ------------------------------------------------------------------ | ------- | -------- |
+| S3-01 | Educator CRUD with profile info, certifications, background check  | ✅      | ✅       |
+| S3-02 | Shift scheduling: weekly patterns with overflow/override support   | ✅      | ✅       |
+| S3-03 | PTO request → approval with educator:child ratio validation        | ✅      | ✅       |
+| S3-04 | Time clock: clock-in/out with timestamps, daily summary            | ✅      | ✅       |
+| S3-05 | Certification tracking with expiry dates and auto-alerts           | ✅      | —        |
+| S3-06 | `@OrganizationAccess()` guard implementation on educator endpoints | ✅      | —        |
+
+## NOT IN SCOPE
+
+- ❌ No family, child, attendance, billing, document, messaging, or report features
+- ❌ No mobile apps
+- ❌ No payroll calculation (hours tracked but not linked to payment)
+- ❌ No educator self-service portal beyond schedule view + PTO request
+- ❌ No automatic shift generation (patterns set by owner, not AI-suggested)
+
+## STANDARD PRACTICES (Mandatory)
+
+- **TypeScript strict** — no `any`, no `@ts-ignore`, no `as unknown` casts outside test files
+- **`CreationAttributes<Model>`** for Sequelize creates; **`WhereOptions`** for where clauses
+- **`C-S-R pattern`**: Controller → Service → Repository
+- **DTOs**: `class-validator` on backend; Zod on frontend
+- **i18n**: Every user-visible string uses `useTranslation()` + `t('key')`
+- **Soft delete**: `paranoid: true` on entities
+- **Rate limiting**: `/time-clock/clock-in` limited to 1 per 5 seconds
+- **Caching**: Current day's schedule cached in Redis (TTL: 5 min)
+- **Swagger**: All new endpoints documented
+- **Migrations**: Every schema change has a migration
+- **Event-driven**: PTO approvals/rejections, schedule changes, time corrections emit events
+- **Data isolation**: Educator can only see own schedule (role scoping via `@OrganizationAccess()`)
 
 ## User Stories
 

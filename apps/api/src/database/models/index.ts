@@ -11,3 +11,5 @@ export { Document } from './document.model';
 export { Message } from './message.model';
 export { AuditLog } from './audit-log.model';
 export { Invitation } from './invitation.model';
+export { RolePermission } from './role-permission.model';
+export { Role } from './role.model';

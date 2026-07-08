@@ -34,4 +34,13 @@ export class QueuesService {
       removeOnFail: 100,
     });
   }
+
+  async queueResetPasswordEmail(data: { email: string; token: string }) {
+    await this.emailQueue.add('send-password-reset', data, {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 5000 },
+      removeOnComplete: 100,
+      removeOnFail: 100,
+    });
+  }
 }

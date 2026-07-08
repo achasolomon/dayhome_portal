@@ -1,7 +1,45 @@
-﻿# Sprint 5 â€” Scheduling & Attendance
+﻿# Sprint 5 — Scheduling & Attendance
 
-**Duration:** Week 11â€“12  
+**Duration:** Week 11–12  
 **Goal:** Child check-in/out, daily attendance board, real-time ratio monitoring, parent notifications, schedule management.
+
+---
+
+## IN SCOPE
+
+| ID    | Deliverable                                                                | Backend | Frontend |
+| ----- | -------------------------------------------------------------------------- | ------- | -------- |
+| S5-01 | Child check-in with health screening (temperature + symptom questionnaire) | ✅      | ✅       |
+| S5-02 | Child check-out with authorized pickup verification (PIN or photo)         | ✅      | ✅       |
+| S5-03 | Real-time daily board via Socket.io                                        | ✅      | ✅       |
+| S5-04 | Ratio monitoring dashboard (real-time educator:child per room)             | ✅      | ✅       |
+| S5-05 | Parent notifications on check-in/out (push + email)                        | ✅      | —        |
+| S5-06 | Attendance history with filters + CSV export                               | ✅      | ✅       |
+
+## NOT IN SCOPE
+
+- ❌ No billing or invoice generation (Sprint 6)
+- ❌ No document upload (Sprint 7)
+- ❌ No messaging or announcements (Sprint 8)
+- ❌ No mobile apps (Sprint 10)
+- ❌ No schedule preference submission (parent) — postponed
+- ❌ No offline check-in (mobile-only feature, Sprint 10)
+
+## STANDARD PRACTICES (Mandatory)
+
+- **Check-in validation**: Cannot check in if already checked in; cannot check out if not checked in
+- **Pickup verification**: PIN hash match or photo confirmation; verification logged in audit
+- **Real-time**: Socket.io for daily board; polling fallback every 30s if WebSocket fails
+- **Ratio enforcement**: Alert if check-in would breach ratio; configurable in org settings
+- **Data retention**: Attendance records retained 7 years (regulatory)
+- **Caching**: Today's attendance cached in Redis (TTL: end of day); invalidated on check-in/out
+- **Audit**: Every check-in/out logged with verification method + educator ID
+- **`C-S-R pattern`**: Controller → Service → Repository
+- **DTOs**: `class-validator` on backend; Zod on frontend
+- **i18n**: Every user-visible string uses `useTranslation()` + `t('key')`
+- **Soft delete**: `paranoid: true` on entities
+- **Migrations**: Every schema change has a migration
+- **Event-driven**: `attendance.updated` emitted on every check-in/out
 
 ---
 

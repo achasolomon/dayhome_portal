@@ -1,7 +1,47 @@
 ﻿# Sprint 2 — Dayhome Management & API Intake
 
-**Duration:** Week 5–6
+**Duration:** Week 5–6  
 **Goal:** API intake webhook receives pre-approved dayhomes from the external Application Portal; dayhome and room management; scaffold dayhome owner portal.
+
+---
+
+## IN SCOPE
+
+| ID    | Deliverable                                                                                                       | Backend | Frontend |
+| ----- | ----------------------------------------------------------------------------------------------------------------- | ------- | -------- |
+| S2-01 | API intake webhook: `POST /api/v1/dayhomes/intake` with HMAC signature, idempotency key, field mapping            | ✅      | —        |
+| S2-02 | Dayhome list + detail: `GET /api/v1/dayhomes`, `GET /api/v1/dayhomes/:id` with status filters, search, pagination | ✅      | ✅       |
+| S2-03 | Dayhome status transitions: `POST /dayhomes/:id/suspend`, `/activate`, `/close`                                   | ✅      | ✅       |
+| S2-04 | Agency liaison assignment: `PATCH /dayhomes/:id` with `liaisonUserId`                                             | ✅      | ✅       |
+| S2-05 | Room CRUD: full CRUD for rooms under a dayhome with capacity validation                                           | ✅      | ✅       |
+| S2-06 | Welcome email + owner account setup flow via BullMQ                                                               | ✅      | —        |
+| S2-07 | Web Dayhome portal scaffold (Next.js 14, Tailwind, ui-kit, Zustand, TanStack Query)                               | —       | ✅       |
+
+## NOT IN SCOPE
+
+- ❌ No manual dayhome registration form (dayhomes arrive pre-approved via webhook only)
+- ❌ No `PENDING` or `DRAFT` dayhome status — dayhomes arrive as `ACTIVE`
+- ❌ No educator, family, child, attendance, billing, document, messaging, or report features
+- ❌ No mobile apps
+- ❌ No multi-tenant organization changes (single-tenant remains)
+- ❌ No `@OrganizationAccess()` guard implementation (will be added in Sprint 3)
+
+## STANDARD PRACTICES (Mandatory)
+
+- **TypeScript strict** — no `any`, no `@ts-ignore`, no `as unknown` casts outside test files
+- **`CreationAttributes<Model>`** for Sequelize creates; **`WhereOptions`** for where clauses
+- **`C-S-R pattern`**: Controller → Service → Repository
+- **DTOs**: `class-validator` on backend; Zod on frontend
+- **i18n**: Every user-visible string uses `useTranslation()` + `t('key')`
+- **Soft delete**: `paranoid: true` on entities
+- **Rate limiting**: Intake webhook 60 req/min per IP; other endpoints 100 req/min
+- **Transactional emails**: Queued via BullMQ
+- **Swagger**: All new endpoints documented
+- **Migrations**: Every schema change has a migration
+- **Error codes**: All thrown exceptions use defined error codes
+- **Event-driven**: State changes emit events (`dayhome.intaken`, `dayhome.suspended`, etc.)
+- **HMAC webhook security**: Signature verification on intake endpoint; reject mismatches with 401
+- **Idempotency**: `Idempotency-Key` header deduplication; keys retained 30+ days
 
 ---
 
