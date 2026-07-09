@@ -15,6 +15,7 @@ import { Queue } from 'bullmq';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
+    rawBody: true,
   });
 
   const serverAdapter = new ExpressAdapter();
