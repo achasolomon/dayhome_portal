@@ -17,6 +17,8 @@ import {
   Invitation,
   RolePermission,
   Role,
+  OrganizationSettings,
+  IntakeLog,
 } from './models';
 
 const models = [
@@ -36,6 +38,8 @@ const models = [
   Invitation,
   RolePermission,
   Role,
+  OrganizationSettings,
+  IntakeLog,
 ];
 
 @Global()

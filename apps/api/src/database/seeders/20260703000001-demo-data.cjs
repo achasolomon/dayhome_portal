@@ -232,6 +232,31 @@ module.exports = {
         updatedAt: new Date(),
       },
     ]);
+
+    await queryInterface.bulkInsert('organization_settings', [
+      {
+        id: '99999999-9999-4999-8999-999999999999',
+        organizationId: '11111111-1111-4111-8111-111111111111',
+        operatingHours: JSON.stringify({
+          monday: { open: '07:00', close: '18:00' },
+          tuesday: { open: '07:00', close: '18:00' },
+          wednesday: { open: '07:00', close: '18:00' },
+          thursday: { open: '07:00', close: '18:00' },
+          friday: { open: '07:00', close: '18:00' },
+        }),
+        holidays: JSON.stringify([
+          { date: '2026-12-25', name: 'Christmas Day', type: 'PUBLIC' },
+          { date: '2026-12-26', name: 'Boxing Day', type: 'PUBLIC' },
+          { date: '2027-01-01', name: "New Year's Day", type: 'PUBLIC' },
+        ]),
+        ratios: JSON.stringify({
+          AB: { infant: 3, toddler: 5, preschool: 8, schoolAge: 15 },
+        }),
+        ratioBreachBehavior: 'WARN',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
   },
 
   down: async (queryInterface) => {
@@ -242,6 +267,7 @@ module.exports = {
       'families',
       'educators',
       'rooms',
+      'organization_settings',
       'dayhomes',
       'users',
       'organizations',

@@ -5,14 +5,14 @@
 
 ## IN SCOPE
 
-| ID    | Deliverable                                                    | Backend | Frontend |
-| ----- | -------------------------------------------------------------- | ------- | -------- |
-| S7-01 | Document upload with ClamAV virus scanning, stored in R2/S3    | ✅      | ✅       |
-| S7-02 | Expiry tracking with color-coded status (green/amber/red)      | ✅      | ✅       |
-| S7-03 | Automated expiry alerts via BullMQ (60/30/14/7 days)           | ✅      | —        |
-| S7-04 | Document renewal with version history                          | ✅      | ✅       |
-| S7-05 | Compliance dashboard per dayhome                               | ✅      | ✅       |
-| S7-06 | Government read-only access (watermarked preview, no download) | ✅      | ✅       |
+| ID    | Deliverable                                                    | Backend | Frontend | Tests      |
+| ----- | -------------------------------------------------------------- | ------- | -------- | ---------- |
+| S7-01 | Document upload with ClamAV virus scanning, stored in R2/S3    | ✅      | ✅       | ✅ BE + FE |
+| S7-02 | Expiry tracking with color-coded status (green/amber/red)      | ✅      | ✅       | ✅ BE + FE |
+| S7-03 | Automated expiry alerts via BullMQ (60/30/14/7 days)           | ✅      | —        | ✅ BE      |
+| S7-04 | Document renewal with version history                          | ✅      | ✅       | ✅ BE + FE |
+| S7-05 | Compliance dashboard per dayhome                               | ✅      | ✅       | ✅ BE + FE |
+| S7-06 | Government read-only access (watermarked preview, no download) | ✅      | ✅       | ✅ BE + FE |
 
 ## NOT IN SCOPE
 
@@ -118,6 +118,15 @@ modules/documents/
 | Compliance rules | Configurable per organization: which document types are "required"                          |
 | Data retention   | Documents retained 7 years after expiry (regulatory); hard-delete after retention period    |
 | Government role  | Read-only; cannot download original files without audit trail; can view watermarked preview |
+
+### Testing Requirements
+
+- **Framework**: Jest (backend), Jest + React Testing Library (frontend)
+- **API tests**: Supertest for all endpoint integration tests
+- **Coverage target**: ≥80% line coverage per module
+- **Test patterns**: Unit tests for services/repositories; integration tests for controllers/endpoints
+- **Per-item expectations**: Each deliverable must have happy-path, validation-error, auth/permission-denial, and edge-case tests
+- **CI enforcement**: `pnpm test:cov` must pass before merge; lint + typecheck gates
 
 ---
 

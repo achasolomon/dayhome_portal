@@ -7,14 +7,14 @@
 
 ## IN SCOPE
 
-| ID    | Deliverable                                                                | Backend | Frontend |
-| ----- | -------------------------------------------------------------------------- | ------- | -------- |
-| S5-01 | Child check-in with health screening (temperature + symptom questionnaire) | ✅      | ✅       |
-| S5-02 | Child check-out with authorized pickup verification (PIN or photo)         | ✅      | ✅       |
-| S5-03 | Real-time daily board via Socket.io                                        | ✅      | ✅       |
-| S5-04 | Ratio monitoring dashboard (real-time educator:child per room)             | ✅      | ✅       |
-| S5-05 | Parent notifications on check-in/out (push + email)                        | ✅      | —        |
-| S5-06 | Attendance history with filters + CSV export                               | ✅      | ✅       |
+| ID    | Deliverable                                                                | Backend | Frontend | Tests      |
+| ----- | -------------------------------------------------------------------------- | ------- | -------- | ---------- |
+| S5-01 | Child check-in with health screening (temperature + symptom questionnaire) | ✅      | ✅       | ✅ BE + FE |
+| S5-02 | Child check-out with authorized pickup verification (PIN or photo)         | ✅      | ✅       | ✅ BE + FE |
+| S5-03 | Real-time daily board via Socket.io                                        | ✅      | ✅       | ✅ BE + FE |
+| S5-04 | Ratio monitoring dashboard (real-time educator:child per room)             | ✅      | ✅       | ✅ BE + FE |
+| S5-05 | Parent notifications on check-in/out (push + email)                        | ✅      | —        | ✅ BE      |
+| S5-06 | Attendance history with filters + CSV export                               | ✅      | ✅       | ✅ BE + FE |
 
 ## NOT IN SCOPE
 
@@ -118,6 +118,15 @@ modules/attendance/
 | Data retention      | Attendance records retained 7 years (regulatory requirement)                              |
 | Caching             | Today's attendance cached in Redis (TTL: end of day); invalidated on check-in/out         |
 | Audit               | Every check-in/out logged with method (PIN, photo, manual) and verifying educator ID      |
+
+### Testing Requirements
+
+- **Framework**: Jest (backend), Jest + React Testing Library (frontend)
+- **API tests**: Supertest for all endpoint integration tests
+- **Coverage target**: ≥80% line coverage per module
+- **Test patterns**: Unit tests for services/repositories; integration tests for controllers/endpoints
+- **Per-item expectations**: Each deliverable must have happy-path, validation-error, auth/permission-denial, and edge-case tests
+- **CI enforcement**: `pnpm test:cov` must pass before merge; lint + typecheck gates
 
 ---
 

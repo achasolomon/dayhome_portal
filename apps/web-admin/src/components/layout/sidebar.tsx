@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@spiced-dayhome/ui-kit';
 import {
   LayoutDashboard,
@@ -44,7 +45,8 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-function NavItemLink({ item, isActive, collapsed }: { item: NavItem; isActive: boolean; collapsed: boolean }) {
+function NavItemLink({ item, isActive, collapsed, t }: { item: NavItem; isActive: boolean; collapsed: boolean; t: (key: string) => string }) {
+  const label = item.i18nKey ? t(item.i18nKey) : item.label;
   return (
     <Link
       href={item.href}
@@ -55,10 +57,10 @@ function NavItemLink({ item, isActive, collapsed }: { item: NavItem; isActive: b
           ? 'bg-white/15 text-white shadow-sm'
           : 'text-sidebar-foreground hover:bg-white/5 hover:text-white',
       )}
-      title={collapsed ? item.label : undefined}
+      title={collapsed ? label : undefined}
     >
       {item.icon && iconMap[item.icon]}
-      {!collapsed && <span className="flex-1">{item.label}</span>}
+      {!collapsed && <span className="flex-1">{label}</span>}
       {!collapsed && item.badge != null && (
         <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-golden/80 px-1.5 text-[10px] font-medium text-white">
           {item.badge}
@@ -68,13 +70,14 @@ function NavItemLink({ item, isActive, collapsed }: { item: NavItem; isActive: b
   );
 }
 
-function NavItemWrapper({ item, pathname, collapsed, depth = 0 }: { item: NavItem; pathname: string; collapsed: boolean; depth?: number }) {
+function NavItemWrapper({ item, pathname, collapsed, t, depth = 0 }: { item: NavItem; pathname: string; collapsed: boolean; t: (key: string) => string; depth?: number }) {
   const hasChildren = item.children && item.children.length > 0;
   const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
   const [expanded, setExpanded] = useState(isActive);
+  const label = item.i18nKey ? t(item.i18nKey) : item.label;
 
   if (!hasChildren || collapsed) {
-    return <NavItemLink item={item} isActive={isActive} collapsed={collapsed} />;
+    return <NavItemLink item={item} isActive={isActive} collapsed={collapsed} t={t} />;
   }
 
   return (
@@ -89,13 +92,13 @@ function NavItemWrapper({ item, pathname, collapsed, depth = 0 }: { item: NavIte
         )}
       >
         {item.icon && iconMap[item.icon]}
-        <span className="flex-1 text-left">{item.label}</span>
+        <span className="flex-1 text-left">{label}</span>
         {expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
       </button>
       {expanded && item.children && (
         <div className="ml-8 mt-1 space-y-1 border-l border-sidebar-border/50 pl-3">
           {item.children.map((child) => (
-            <NavItemWrapper key={child.href} item={child} pathname={pathname} collapsed={collapsed} depth={depth + 1} />
+            <NavItemWrapper key={child.href} item={child} pathname={pathname} collapsed={collapsed} t={t} depth={depth + 1} />
           ))}
         </div>
       )}
@@ -105,6 +108,7 @@ function NavItemWrapper({ item, pathname, collapsed, depth = 0 }: { item: NavIte
 
 export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -134,20 +138,23 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
 
         {/* Navigation groups */}
         <nav className="scrollbar-hidden flex-1 space-y-5 overflow-y-auto p-2">
-          {navGroups.map((group) => (
+          {navGroups.map((group) => {
+            const groupLabel = group.i18nKey ? t(group.i18nKey) : group.label;
+            return (
             <div key={group.label}>
               {!collapsed && (
                 <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-sidebar-foreground/50">
-                  {group.label}
+                  {groupLabel}
                 </p>
               )}
               <div className="space-y-0.5">
                 {group.items.map((item) => (
-                  <NavItemWrapper key={item.href} item={item} pathname={pathname} collapsed={collapsed} />
+                  <NavItemWrapper key={item.href} item={item} pathname={pathname} collapsed={collapsed} t={t} />
                 ))}
               </div>
             </div>
-          ))}
+            );
+          })}
         </nav>
 
         {/* Bottom actions */}
@@ -155,10 +162,10 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
           <div className="space-y-0.5">
             <button
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-all hover:bg-white/5 hover:text-white"
-              title={collapsed ? 'Notifications' : undefined}
+              title={collapsed ? t('nav.notifications') : undefined}
             >
               <Bell className="h-5 w-5 shrink-0" />
-              {!collapsed && <span className="flex-1 text-left">Notifications</span>}
+              {!collapsed && <span className="flex-1 text-left">{t('nav.notifications')}</span>}
             </button>
             <Link
               href="/audit-log"
@@ -166,17 +173,17 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
                 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-all hover:bg-white/5 hover:text-white',
                 collapsed ? 'justify-center' : '',
               )}
-              title={collapsed ? 'Audit Log' : undefined}
+              title={collapsed ? t('nav.auditLog') : undefined}
             >
               <ClipboardList className="h-5 w-5 shrink-0" />
-              {!collapsed && <span className="flex-1">Audit Log</span>}
+              {!collapsed && <span className="flex-1">{t('nav.auditLog')}</span>}
             </Link>
             <button
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-all hover:bg-white/5 hover:text-white"
-              title={collapsed ? 'Logout' : undefined}
+              title={collapsed ? t('nav.logout') : undefined}
             >
               <LogOut className="h-5 w-5 shrink-0" />
-              {!collapsed && <span className="flex-1 text-left">Logout</span>}
+              {!collapsed && <span className="flex-1 text-left">{t('nav.logout')}</span>}
             </button>
           </div>
         </div>

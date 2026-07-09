@@ -7,22 +7,22 @@
 
 ## IN SCOPE
 
-| ID    | Deliverable                                                 | Backend | Frontend |
-| ----- | ----------------------------------------------------------- | ------- | -------- |
-| S9-01 | Attendance report (daily/monthly/range) with CSV/PDF export | âœ…     | âœ…      |
-| S9-02 | Financial report (revenue, AR aging, subsidy impact)        | âœ…     | âœ…      |
-| S9-03 | Compliance report (document status, expiry overview)        | âœ…     | âœ…      |
-| S9-04 | Enrollment report (capacity, waitlist trends)               | âœ…     | âœ…      |
-| S9-05 | Admin dashboard with KPI cards                              | âœ…     | âœ…      |
-| S9-06 | Government read-only endpoints (aggregate data only)        | âœ…     | âœ…      |
+| ID    | Deliverable                                                 | Backend | Frontend | Tests      |
+| ----- | ----------------------------------------------------------- | ------- | -------- | ---------- |
+| S9-01 | Attendance report (daily/monthly/range) with CSV/PDF export | ✅      | ✅       | ✅ BE + FE |
+| S9-02 | Financial report (revenue, AR aging, subsidy impact)        | ✅      | ✅       | ✅ BE + FE |
+| S9-03 | Compliance report (document status, expiry overview)        | ✅      | ✅       | ✅ BE + FE |
+| S9-04 | Enrollment report (capacity, waitlist trends)               | ✅      | ✅       | ✅ BE + FE |
+| S9-05 | Admin dashboard with KPI cards                              | ✅      | ✅       | ✅ BE + FE |
+| S9-06 | Government read-only endpoints (aggregate data only)        | ✅      | ✅       | ✅ BE + FE |
 
 ## NOT IN SCOPE
 
-- âŒ No mobile apps (Sprint 10)
-- âŒ No advanced analytics / ML predictions
-- âŒ No custom report builder (pre-defined report types only)
-- âŒ No real-time dashboard streaming (polling-based refresh)
-- âŒ No third-party BI tool integration (Tableau, PowerBI, Metabase)
+- ❌ No mobile apps (Sprint 10)
+- ❌ No advanced analytics / ML predictions
+- ❌ No custom report builder (pre-defined report types only)
+- ❌ No real-time dashboard streaming (polling-based refresh)
+- ❌ No third-party BI tool integration (Tableau, PowerBI, Metabase)
 
 ## STANDARD PRACTICES (Mandatory)
 
@@ -38,6 +38,15 @@
 - **DTOs**: class-validator on backend; Zod on frontend
 - **i18n**: Every user-visible string uses useTranslation() + ('key')
 - **Migrations**: Materialized views tracked in migrations
+
+### Testing Requirements
+
+- **Framework**: Jest (backend), Jest + React Testing Library (frontend)
+- **API tests**: Supertest for all endpoint integration tests
+- **Coverage target**: ≥80% line coverage per module
+- **Test patterns**: Unit tests for services/repositories; integration tests for controllers/endpoints
+- **Per-item expectations**: Each deliverable must have happy-path, validation-error, auth/permission-denial, and edge-case tests
+- **CI enforcement**: `pnpm test:cov` must pass before merge; lint + typecheck gates
 
 ## User Stories
 

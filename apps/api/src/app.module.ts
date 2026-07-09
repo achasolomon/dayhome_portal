@@ -4,7 +4,8 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { LoggerModule } from 'nestjs-pino';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { TransformInterceptor } from './common/transform.interceptor';
 import { BullModule } from '@nestjs/bullmq';
 
 import { AppController } from './app.controller';
@@ -16,6 +17,10 @@ import { AuthModule } from './auth/auth.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { StaffModule } from './modules/staff/staff.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { AuditLogModule } from './modules/audit-log/audit-log.module';
+import { AuditLogInterceptor } from './modules/audit-log/audit-log.interceptor';
+import { DayhomeModule } from './modules/dayhome/dayhome.module';
 import { HealthModule } from './health/health.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailModule } from './mail/mail.module';
@@ -111,7 +116,10 @@ import { DatabaseModule } from './database/database.module';
     MailModule,
     StorageModule,
     PrometheusModule.register(),
+    SettingsModule,
+    AuditLogModule,
     QueuesModule,
+    DayhomeModule,
   ],
   controllers: [AppController],
   providers: [
@@ -119,6 +127,14 @@ import { DatabaseModule } from './database/database.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditLogInterceptor,
     },
   ],
 })

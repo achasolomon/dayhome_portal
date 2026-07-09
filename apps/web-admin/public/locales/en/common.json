@@ -17,7 +17,18 @@
     "messages": "Messages",
     "reports": "Reports",
     "settings": "Settings",
-    "logout": "Logout"
+    "logout": "Logout",
+    "staff": "Staff",
+    "invoices": "Invoices",
+    "usersRoles": "Users & Roles",
+    "notifications": "Notifications",
+    "auditLog": "Audit Log",
+    "groups": {
+      "main": "Main",
+      "management": "Management",
+      "operations": "Operations",
+      "settings": "Settings"
+    }
   },
   "auth": {
     "login": "Login",
@@ -56,7 +67,29 @@
     "newPassword": "New Password",
     "min6Chars": "Min. 6 characters",
     "reEnterPassword": "Re-enter your password",
-    "resetting": "Resetting..."
+    "resetting": "Resetting...",
+    "createAccount": "Create Account",
+    "creatingAccount": "Creating account...",
+    "alreadyHaveAccount": "Already have an account?",
+    "acceptInvite": "Complete Registration",
+    "invitedAs": "You've been invited as {{role}} — {{email}}",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phoneNumber": "Phone Number",
+    "atLeast8Chars": "At least 8 characters",
+    "repeatPassword": "Repeat your password",
+    "accountCreated": "Account Created!",
+    "accountCreatedDescription": "Welcome to Spiced Dayhome. Redirecting to dashboard...",
+    "invalidInvitation": "Invalid Invitation",
+    "validatingInvitation": "Validating your invitation...",
+    "noInvitationToken": "No invitation token provided. Please check the link you received.",
+    "invitationFailed": "Failed to accept invitation",
+    "validationFailed": "Unable to validate invitation. Please try again.",
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "welcome": "Hello! Welcome to {{name}}. Continue to login."
   },
   "common": {
     "loading": "Loading...",
@@ -89,7 +122,8 @@
     "thisWeek": "This Week",
     "thisMonth": "This Month",
     "customRange": "Custom Range",
-    "pending": "Pending"
+    "pending": "Pending",
+    "deleting": "Deleting..."
   },
   "validation": {
     "required": "This field is required",
@@ -161,7 +195,25 @@
     "failedToDelete": "Failed to delete role",
     "permissionsUpdated": "Permissions updated",
     "changesSaved": "Changes saved for {{role}}",
-    "roleDeleted": "Role deleted"
+    "roleDeleted": "Role deleted",
+    "createCustomRole": "Create Custom Role",
+    "defineNewRole": "Define a new role with a unique key and display label. You can then assign permissions in the matrix.",
+    "roleKey": "Role Key",
+    "roleKeyPlaceholder": "e.g. CUSTOM_MANAGER",
+    "roleKeyHint": "Uppercase letters, numbers, and underscores only",
+    "displayLabel": "Display Label",
+    "displayLabelPlaceholder": "e.g. Custom Manager",
+    "creating": "Creating...",
+    "roleCreated": "Role created",
+    "failedToCreateRole": "Failed to create role"
+  },
+  "header": {
+    "profile": "Profile",
+    "logout": "Logout",
+    "loggingOut": "Logging out...",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "toggleNav": "Toggle navigation menu"
   },
   "error": {
     "generic": "Something went wrong. Please try again.",

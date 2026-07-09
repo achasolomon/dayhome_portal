@@ -1,11 +1,19 @@
 'use client';
 
 import { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardContent,
   Button,
   Badge,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalDescription,
+  ModalFooter,
+  ModalClose,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -29,36 +37,8 @@ import { CreateRoleDrawer } from '@/components/roles/create-role-drawer';
 
 const GROUPS_PER_PAGE = 4;
 
-function confirmDialog(
-  title: string,
-  description: string,
-): Promise<boolean> {
-  return new Promise((resolve) => {
-    const dialog = document.createElement('dialog');
-    dialog.className =
-      'fixed inset-0 z-50 m-auto flex max-w-sm flex-col gap-4 rounded-lg border bg-background p-6 shadow-lg open:flex';
-    dialog.innerHTML = `
-      <h2 class="text-lg font-semibold">${title}</h2>
-      <p class="text-sm text-muted-foreground">${description}</p>
-      <div class="flex justify-end gap-2 pt-2">
-        <button class="cancel-btn inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-muted">Cancel</button>
-        <button class="confirm-btn inline-flex items-center justify-center rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90">Delete</button>
-      </div>`;
-    document.body.appendChild(dialog);
-    dialog.showModal();
-    dialog.querySelector('.cancel-btn')?.addEventListener('click', () => {
-      dialog.close(); resolve(false);
-    });
-    dialog.querySelector('.confirm-btn')?.addEventListener('click', () => {
-      dialog.close(); resolve(true);
-    });
-    dialog.addEventListener('close', () => {
-      dialog.remove(); resolve(false);
-    });
-  });
-}
-
 export default function UsersRolesPage() {
+  const { t } = useTranslation();
   const [roles, setRoles] = useState<RoleWithPermissions[]>([]);
   const [groups, setGroups] = useState<PermissionGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,6 +47,7 @@ export default function UsersRolesPage() {
   const [dirty, setDirty] = useState<Map<string, Set<string>>>(new Map());
   const [page, setPage] = useState(0);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -77,13 +58,13 @@ export default function UsersRolesPage() {
       setRoles(data.roles);
       setGroups(data.permissionGroups);
     } catch {
-      toast({ title: 'Failed to load roles', description: 'Please try again.', variant: 'error' });
+      toast({ title: t('roles.failedToLoad'), description: t('staff.tryAgain'), variant: 'error' });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
   const systemRoles = useMemo(() => new Set(['ORG_ADMIN', 'ORG_MANAGER', 'BILLING_ONLY']), []);
 
@@ -132,31 +113,31 @@ export default function UsersRolesPage() {
       setRoles((prev) =>
         prev.map((r) => (r.role === role ? { ...r, permissions: perms } : r)),
       );
-      toast({ title: 'Permissions updated', description: `Changes saved for ${role}`, variant: 'success' });
+      toast({ title: t('roles.permissionsUpdated'), description: t('roles.changesSaved', { role }), variant: 'success' });
     } catch {
-      toast({ title: 'Failed to save', description: 'Please try again.', variant: 'error' });
+      toast({ title: t('roles.failedToSave'), description: t('staff.tryAgain'), variant: 'error' });
     } finally {
       setSaving(null);
     }
   }
 
   async function handleDeleteRole(role: string) {
-    const confirmed = await confirmDialog(
-      'Delete Role',
-      `Are you sure you want to delete "${role}"? Users with this role will be reassigned to "Manager".`,
-    );
-    if (!confirmed) return;
     try {
       setDeleting(role);
+      setDeleteConfirm(null);
       await rolesApi.deleteRole(role);
-      toast({ title: 'Role deleted', variant: 'success' });
+      toast({ title: t('roles.roleDeleted'), variant: 'success' });
       await load();
     } catch {
-      toast({ title: 'Failed to delete role', description: 'Please try again.', variant: 'error' });
+      toast({ title: t('roles.failedToDelete'), description: t('staff.tryAgain'), variant: 'error' });
     } finally {
       setDeleting(null);
     }
   }
+
+  const deletingRoleName = deleteConfirm
+    ? roles.find((r) => r.role === deleteConfirm)?.label ?? deleteConfirm
+    : '';
 
   if (loading) {
     return (
@@ -171,11 +152,11 @@ export default function UsersRolesPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Users & Roles</h1>
-          <p className="mt-1 text-muted-foreground">Manage role permissions across the system</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('roles.pageTitle')}</h1>
+          <p className="mt-1 text-muted-foreground">{t('roles.pageDescription')}</p>
         </div>
         <Button onClick={() => setShowCreateModal(true)}>
-          <Plus className="mr-1.5 h-4 w-4" /> Create Role
+          <Plus className="mr-1.5 h-4 w-4" /> {t('roles.createRole')}
         </Button>
       </div>
 
@@ -191,10 +172,10 @@ export default function UsersRolesPage() {
                 <div className="flex items-center gap-2">
                   <p className="text-lg font-bold truncate">{role.label}</p>
                   {systemRoles.has(role.role) && (
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">System</Badge>
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">{t('roles.system')}</Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">{role.permissions.length} permissions</p>
+                <p className="text-xs text-muted-foreground">{role.permissions.length} {t('roles.permissions')}</p>
               </div>
               {!systemRoles.has(role.role) && (
                 <DropdownMenu>
@@ -206,7 +187,7 @@ export default function UsersRolesPage() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
                       className="text-destructive"
-                      onClick={() => handleDeleteRole(role.role)}
+                      onClick={() => setDeleteConfirm(role.role)}
                       disabled={deleting === role.role}
                     >
                       {deleting === role.role ? (
@@ -214,7 +195,7 @@ export default function UsersRolesPage() {
                       ) : (
                         <Trash2 className="mr-2 h-4 w-4" />
                       )}
-                      Delete Role
+                      {t('roles.deleteRole')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -229,7 +210,7 @@ export default function UsersRolesPage() {
         {/* Save bar at top */}
         {anyDirty && (
           <div className="flex items-center justify-between rounded-t-lg border-b bg-muted/30 px-5 py-3">
-            <p className="text-sm text-muted-foreground">You have unsaved changes</p>
+            <p className="text-sm text-muted-foreground">{t('roles.unsavedChanges')}</p>
             <div className="flex gap-2">
               {roles.map(
                 (role) =>
@@ -241,9 +222,9 @@ export default function UsersRolesPage() {
                       size="sm"
                     >
                       {saving === role.role ? (
-                        <><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Saving...</>
+                        <><Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> {t('roles.saving')}</>
                       ) : (
-                        <><Save className="mr-1.5 h-3.5 w-3.5" /> Save {role.label}</>
+                        <><Save className="mr-1.5 h-3.5 w-3.5" /> {t('roles.saveLabel', { role: role.label })}</>
                       )}
                     </Button>
                   ),
@@ -258,7 +239,7 @@ export default function UsersRolesPage() {
               <thead>
                 <tr className="border-b bg-muted/50">
                   <th className="h-11 px-4 text-left align-middle font-medium text-muted-foreground w-56">
-                    Permission
+                    {t('roles.permission')}
                   </th>
                   {roles.map((role) => (
                     <th
@@ -268,7 +249,7 @@ export default function UsersRolesPage() {
                       <div className="flex flex-col items-center gap-1">
                         <span>{role.label}</span>
                         {isDirty(role.role) && (
-                          <span className="text-[10px] font-semibold text-amber">Unsaved</span>
+                          <span className="text-[10px] font-semibold text-amber">{t('roles.unsaved')}</span>
                         )}
                       </div>
                     </th>
@@ -279,7 +260,6 @@ export default function UsersRolesPage() {
               <tbody>
                 {currentGroups.map((group) => (
                   <Fragment key={group.group}>
-                    {/* Group header row */}
                     <tr className="border-b bg-muted/20">
                       <td
                         colSpan={roles.length + 2}
@@ -288,7 +268,6 @@ export default function UsersRolesPage() {
                         {group.groupLabel}
                       </td>
                     </tr>
-                    {/* Permission rows */}
                     {group.permissions.map((perm) => (
                       <tr
                         key={perm.key}
@@ -337,7 +316,7 @@ export default function UsersRolesPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t px-5 py-3">
               <p className="text-xs text-muted-foreground">
-                Showing {currentGroups.length} of {groups.length} permission groups
+                {t('roles.showingGroups', { count: currentGroups.length, total: groups.length })}
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -372,6 +351,34 @@ export default function UsersRolesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      <Modal open={!!deleteConfirm} onOpenChange={(o) => { if (!o) setDeleteConfirm(null); }}>
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>{t('roles.deleteConfirmTitle')}</ModalTitle>
+            <ModalDescription>
+              {t('roles.deleteConfirmDescription', { role: deletingRoleName })}
+            </ModalDescription>
+          </ModalHeader>
+          <ModalFooter>
+            <ModalClose asChild>
+              <Button variant="outline">{t('common.cancel')}</Button>
+            </ModalClose>
+            <Button
+              variant="destructive"
+              onClick={() => deleteConfirm && handleDeleteRole(deleteConfirm)}
+              disabled={deleting === deleteConfirm}
+            >
+              {deleting === deleteConfirm ? (
+                <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> {t('common.deleting')}</>
+              ) : (
+                <><Trash2 className="mr-1.5 h-4 w-4" /> {t('common.delete')}</>
+              )}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       {/* Create Role Drawer */}
       <CreateRoleDrawer

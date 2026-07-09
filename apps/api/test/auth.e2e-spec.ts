@@ -57,6 +57,9 @@ describe('Auth (e2e)', () => {
             refresh: jest.fn(),
             logout: jest.fn(),
             findById: jest.fn(),
+            forgotPassword: jest.fn(),
+            resetPassword: jest.fn(),
+            changePassword: jest.fn(),
           },
         },
         {
@@ -142,6 +145,20 @@ describe('Auth (e2e)', () => {
         .send({})
         .expect(400);
     });
+
+    it('should return 400 with invalid email format', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/login')
+        .send({ email: 'not-an-email', password: 'ValidPass1!' })
+        .expect(400);
+    });
+
+    it('should return 400 with password too short', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/login')
+        .send({ email: 'a@b.com', password: 'short' })
+        .expect(400);
+    });
   });
 
   describe('POST /api/v1/auth/register', () => {
@@ -166,6 +183,20 @@ describe('Auth (e2e)', () => {
         .expect(201);
 
       expect(res.body.email).toBe('new@b.com');
+    });
+
+    it('should return 400 with missing email', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/register')
+        .send({ password: 'ValidPass1!' })
+        .expect(400);
+    });
+
+    it('should return 400 with missing password', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/register')
+        .send({ email: 'new@b.com' })
+        .expect(400);
     });
   });
 
@@ -206,6 +237,28 @@ describe('Auth (e2e)', () => {
 
       expect(res.body.message).toBe('Invalid or expired refresh token');
     });
+
+    it('should return 401 when refresh token has wrong signature', async () => {
+      authService.refresh.mockRejectedValue(
+        new UnauthorizedException('Invalid refresh token signature'),
+      );
+
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', ['refresh_token=tampered-token'])
+        .expect(401);
+    });
+
+    it('should return 401 when refresh token refers to deleted user', async () => {
+      authService.refresh.mockRejectedValue(
+        new UnauthorizedException('User not found'),
+      );
+
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', ['refresh_token=deleted-user-token'])
+        .expect(401);
+    });
   });
 
   describe('POST /api/v1/auth/logout', () => {
@@ -219,6 +272,15 @@ describe('Auth (e2e)', () => {
 
       expect(res.body.message).toBe('Logged out successfully');
     });
+
+    it('should still return 201 when logout service fails', async () => {
+      authService.logout.mockRejectedValue(new Error('DB error'));
+
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/logout')
+        .set('Authorization', 'Bearer valid-token')
+        .expect(201);
+    });
   });
 
   describe('GET /api/v1/auth/me', () => {
@@ -229,6 +291,197 @@ describe('Auth (e2e)', () => {
         .expect(200);
 
       expect(res.body.email).toBe('a@b.com');
+    });
+  });
+
+  describe('POST /api/v1/auth/forgot-password', () => {
+    it('should return 201 when email is provided', async () => {
+      authService.forgotPassword.mockResolvedValue(undefined);
+
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/forgot-password')
+        .send({ email: 'user@example.com' })
+        .expect(201);
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(authService.forgotPassword).toHaveBeenCalledWith(
+        'user@example.com',
+      );
+    });
+
+    it('should return 400 with missing email', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/forgot-password')
+        .send({})
+        .expect(400);
+    });
+
+    it('should return 400 with invalid email format', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/forgot-password')
+        .send({ email: 'not-an-email' })
+        .expect(400);
+    });
+  });
+
+  describe('POST /api/v1/auth/reset-password', () => {
+    it('should return 201 when token and password are valid', async () => {
+      authService.resetPassword.mockResolvedValue(undefined);
+
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/reset-password')
+        .send({ token: 'valid-token', password: 'NewPass123!' })
+        .expect(201);
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(authService.resetPassword).toHaveBeenCalledWith(
+        'valid-token',
+        'NewPass123!',
+      );
+    });
+
+    it('should return 401 with invalid token', async () => {
+      authService.resetPassword.mockRejectedValue(
+        new UnauthorizedException('Invalid or expired reset token'),
+      );
+
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/auth/reset-password')
+        .send({ token: 'invalid-token', password: 'NewPass123!' })
+        .expect(401);
+
+      expect(res.body.message).toBe('Invalid or expired reset token');
+    });
+
+    it('should return 401 with expired token', async () => {
+      authService.resetPassword.mockRejectedValue(
+        new UnauthorizedException('Reset token has expired'),
+      );
+
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/auth/reset-password')
+        .send({ token: 'expired-token', password: 'NewPass123!' })
+        .expect(401);
+
+      expect(res.body.message).toBe('Reset token has expired');
+    });
+
+    it('should return 400 with missing token', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/reset-password')
+        .send({ password: 'NewPass123!' })
+        .expect(400);
+    });
+
+    it('should return 400 with missing password', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/reset-password')
+        .send({ token: 'some-token' })
+        .expect(400);
+    });
+
+    it('should return 400 with password too short', async () => {
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/reset-password')
+        .send({ token: 'some-token', password: '12345' })
+        .expect(400);
+    });
+  });
+
+  describe('POST /api/v1/auth/change-password', () => {
+    it('should return 201 with valid old and new password', async () => {
+      authService.changePassword.mockResolvedValue({
+        message: 'Password changed',
+      });
+
+      await request(app.getHttpServer())
+        .post('/api/v1/auth/change-password')
+        .set('Authorization', 'Bearer valid-token')
+        .send({ oldPassword: 'OldPass1!', newPassword: 'NewPass1!' })
+        .expect(201);
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(authService.changePassword).toHaveBeenCalledWith(
+        'u1',
+        'OldPass1!',
+        'NewPass1!',
+      );
+    });
+
+    it('should return 401 with wrong old password', async () => {
+      authService.changePassword.mockRejectedValue(
+        new UnauthorizedException('Current password is incorrect'),
+      );
+
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/auth/change-password')
+        .set('Authorization', 'Bearer valid-token')
+        .send({ oldPassword: 'WrongPass1!', newPassword: 'NewPass1!' })
+        .expect(401);
+
+      expect(res.body.message).toBe('Current password is incorrect');
+    });
+  });
+
+  describe('Token expiry and refresh cycle', () => {
+    it('should handle token refresh after access token expires', async () => {
+      const mockUser = { id: 'u1', email: 'a@b.com', role: 'ORG_ADMIN' };
+
+      // First refresh succeeds
+      authService.refresh.mockResolvedValueOnce({
+        accessToken: 'refreshed-token',
+        refreshToken: 'new-refresh-token',
+        user: mockUser as never,
+      });
+
+      const refreshRes = await request(app.getHttpServer())
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', ['refresh_token=still-valid-token'])
+        .expect(201);
+
+      expect(refreshRes.body.accessToken).toBe('refreshed-token');
+
+      // Then refresh fails because refresh token also expired
+      authService.refresh.mockRejectedValueOnce(
+        new UnauthorizedException('Refresh token expired'),
+      );
+
+      const expiredRes = await request(app.getHttpServer())
+        .post('/api/v1/auth/refresh')
+        .set('Cookie', ['refresh_token=expired-refresh-token'])
+        .expect(401);
+
+      expect(expiredRes.body.message).toBe('Refresh token expired');
+    });
+  });
+
+  describe('Rate limiting / brute force protection', () => {
+    it('should reject login attempts with invalid credentials', async () => {
+      authService.validateUser.mockResolvedValue(null);
+
+      for (let i = 0; i < 3; i++) {
+        await request(app.getHttpServer())
+          .post('/api/v1/auth/login')
+          .send({ email: 'a@b.com', password: 'wrongpass' })
+          .expect(401);
+      }
+    });
+
+    it('should accept valid credentials after previous failures', async () => {
+      const mockUser = { id: 'u1', email: 'a@b.com', role: 'ORG_ADMIN' };
+      authService.validateUser.mockResolvedValue(mockUser as never);
+      authService.login.mockResolvedValue({
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        user: mockUser as never,
+      });
+
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/auth/login')
+        .send({ email: 'a@b.com', password: 'CorrectPass1!' })
+        .expect(201);
+
+      expect(res.body.accessToken).toBeDefined();
     });
   });
 });

@@ -2,13 +2,33 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 import { Button, Input } from '@spiced-dayhome/ui-kit';
 import { staffApi } from '@/lib/api/staff';
 import { authApi } from '@/lib/api/auth';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 
+const acceptInviteSchema = z
+  .object({
+    firstName: z.string().min(1, 'auth.firstNameRequired'),
+    lastName: z.string().min(1, 'auth.lastNameRequired'),
+    phone: z.string().optional(),
+    password: z.string().min(8, 'auth.passwordMinLength'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'auth.passwordsDoNotMatch',
+    path: ['confirmPassword'],
+  });
+
+type AcceptInviteForm = z.infer<typeof acceptInviteSchema>;
+
 export default function AcceptInvitePage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
@@ -16,85 +36,68 @@ export default function AcceptInvitePage() {
   const [valid, setValid] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('');
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<AcceptInviteForm>({
+    resolver: zodResolver(acceptInviteSchema),
+  });
 
   useEffect(() => {
     if (!token) {
       setValidating(false);
-      setError('No invitation token provided. Please check the link you received.');
+      setError(t('auth.noInvitationToken'));
       return;
     }
-    staffApi.checkInvitation(token).then((result) => {
-      if (result.valid) {
-        setValid(true);
-        setInviteEmail(result.email ?? '');
-        setInviteRole(result.role ?? '');
-        setFirstName(result.firstName ?? '');
-        setLastName(result.lastName ?? '');
-        setPhone(result.phone ?? '');
-      } else {
-        setError(result.message ?? 'Invitation is invalid or has expired.');
-      }
-    }).catch(() => {
-      setError('Unable to validate invitation. Please try again.');
-    }).finally(() => {
-      setValidating(false);
-    });
-  }, [token]);
+    staffApi
+      .checkInvitation(token)
+      .then((result) => {
+        if (result.valid) {
+          setValid(true);
+          setInviteEmail(result.email ?? '');
+          setInviteRole(result.role ?? '');
+          if (result.firstName) setValue('firstName', result.firstName);
+          if (result.lastName) setValue('lastName', result.lastName);
+          if (result.phone) setValue('phone', result.phone);
+        } else {
+          setError(result.message ?? t('auth.invalidInvitation'));
+        }
+      })
+      .catch(() => {
+        setError(t('auth.validationFailed'));
+      })
+      .finally(() => {
+        setValidating(false);
+      });
+  }, [token, t, setValue]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!firstName.trim() || !lastName.trim()) {
-      setError('First name and last name are required.');
-      return;
-    }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    setSubmitting(true);
+  async function onSubmit(data: AcceptInviteForm) {
     try {
       await staffApi.acceptInvite({
         token: token!,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        phone: phone.trim() || undefined,
-        password,
+        firstName: data.firstName.trim(),
+        lastName: data.lastName.trim(),
+        phone: data.phone?.trim() || undefined,
+        password: data.password,
       });
       setSuccess(true);
-      await authApi.login(inviteEmail, password);
+      await authApi.login(inviteEmail, data.password);
       router.push('/dashboard');
-    } catch (err: unknown) {
-      const message =
-        err && typeof err === 'object' && 'response' in err
-          ? (err as { response: { data: { message: string } } }).response?.data?.message || 'Failed to accept invitation'
-          : 'Failed to accept invitation';
-      setError(message);
-    } finally {
-      setSubmitting(false);
+    } catch {
+      setError(t('auth.invitationFailed'));
     }
-  };
+  }
 
   if (validating) {
     return (
       <div className="flex flex-col items-center gap-4 py-8">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Validating your invitation...</p>
+        <p className="text-sm text-muted-foreground">{t('auth.validatingInvitation')}</p>
       </div>
     );
   }
@@ -103,8 +106,8 @@ export default function AcceptInvitePage() {
     return (
       <div className="flex flex-col items-center gap-4 py-8 text-center">
         <CheckCircle className="h-12 w-12 text-green-500" />
-        <h2 className="text-xl font-semibold">Account Created!</h2>
-        <p className="text-sm text-muted-foreground">Welcome to Spiced Dayhome. Redirecting to dashboard...</p>
+        <h2 className="text-xl font-semibold">{t('auth.accountCreated')}</h2>
+        <p className="text-sm text-muted-foreground">{t('auth.accountCreatedDescription')}</p>
       </div>
     );
   }
@@ -113,7 +116,7 @@ export default function AcceptInvitePage() {
     return (
       <div className="flex flex-col items-center gap-4 py-8 text-center">
         <XCircle className="h-12 w-12 text-red-500" />
-        <h2 className="text-xl font-semibold">Invalid Invitation</h2>
+        <h2 className="text-xl font-semibold">{t('auth.invalidInvitation')}</h2>
         <p className="text-sm text-muted-foreground">{error}</p>
       </div>
     );
@@ -122,69 +125,63 @@ export default function AcceptInvitePage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-primary">Complete Registration</h1>
+        <h1 className="text-2xl font-bold text-primary">{t('auth.acceptInvite')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          You&apos;ve been invited as <span className="font-medium text-foreground">{inviteRole.replace(/_/g, ' ')}</span>
-          {inviteEmail && <> &mdash; {inviteEmail}</>}
+          {t('auth.invitedAs', { role: inviteRole.replace(/_/g, ' '), email: inviteEmail })}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <Input
             id="firstName"
-            label="First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            label={t('auth.firstName')}
             placeholder="John"
-            required
+            error={errors.firstName && t(errors.firstName.message as string)}
+            {...register('firstName')}
           />
           <Input
             id="lastName"
-            label="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            label={t('auth.lastName')}
             placeholder="Doe"
-            required
+            error={errors.lastName && t(errors.lastName.message as string)}
+            {...register('lastName')}
           />
         </div>
 
         <Input
           id="phone"
-          label="Phone Number"
+          label={t('auth.phoneNumber')}
           type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
           placeholder="+1-555-0123"
+          {...register('phone')}
         />
 
         <Input
           id="password"
           type="password"
-          label="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="At least 8 characters"
-          required
+          label={t('auth.password')}
+          placeholder={t('auth.atLeast8Chars')}
+          error={errors.password && t(errors.password.message as string)}
+          {...register('password')}
         />
 
         <Input
           id="confirmPassword"
           type="password"
-          label="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Repeat your password"
-          required
+          label={t('auth.confirmPassword')}
+          placeholder={t('auth.repeatPassword')}
+          error={errors.confirmPassword && t(errors.confirmPassword.message as string)}
+          {...register('confirmPassword')}
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-        <Button type="submit" className="w-full" disabled={submitting}>
-          {submitting ? (
-            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Account...</>
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t('auth.creatingAccount')}</>
           ) : (
-            'Create Account'
+            t('auth.createAccount')
           )}
         </Button>
       </form>

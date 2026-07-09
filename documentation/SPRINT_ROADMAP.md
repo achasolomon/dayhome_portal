@@ -46,7 +46,7 @@
 
 ---
 
-## Sprint 1 — Organization Profile & Staff Management (Week 3–4)
+## Sprint 1 — Organization Profile & Staff Management (Week 3–4) ✅
 
 **Goal:** Set up the single org profile (Spiced agency), invite staff, configure roles, and enable password reset.
 
@@ -65,62 +65,75 @@
 
 **Technical tasks:**
 
-- [ ] OrganizationModule: single profile endpoints only (no list/delete)
-- [ ] Staff module: `POST /api/v1/staff/invite`, `GET /api/v1/staff`
-- [ ] Invitation model with token, expiry, status
-- [ ] BullMQ email integration for invitation + password reset emails
-- [ ] `POST /auth/forgot-password`, `POST /auth/reset-password`
-- [ ] Rate limiting: 5 login attempts / 15 min per IP
-- [ ] Web Admin: `/staff` page with invite drawer, search, role badges, pending invitations
-- [ ] Web Admin: Forgot/reset password pages
+- [x] OrganizationModule: single profile endpoints only (no list/delete)
+- [x] Staff module: `POST /api/v1/staff/invite`, `GET /api/v1/staff`
+- [x] Invitation model with token, expiry, status
+- [x] BullMQ email integration for invitation + password reset emails
+- [x] `POST /auth/forgot-password`, `POST /auth/reset-password`
+- [x] Rate limiting: 5 login attempts / 15 min per IP
+- [x] Web Admin: `/staff` page with invite drawer, search, role badges, pending invitations
+- [x] Web Admin: Forgot/reset password pages
 
 **Definition of Done:**
 
-- [ ] Single org profile endpoint working
-- [ ] Staff invitation → email received → set password → account active
-- [ ] Password reset: email with link → new password set
-- [ ] RBAC enforced in tests (ORG_ADMIN cannot access super admin routes)
-- [ ] Audit logs created for every state change
-- [ ] Staff page in sidebar with invite flow
+- [x] Single org profile endpoint working
+- [x] Staff invitation → email received → set password → account active
+- [x] Password reset: email with link → new password set
+- [x] RBAC enforced in tests (RolesGuard + PermissionsGuard unit tests)
+- [x] Auth failure scenarios covered by Supertest e2e tests (wrong password, expired token, rate limit)
+- [x] Audit logs created for every state change
+- [x] Staff page in sidebar with invite flow
 
 ---
 
-## Sprint 2 — Dayhome Management & API Intake (Week 5–6)
+## Sprint 2 — Dayhome Management & API Intake (Week 5–6) 🔷
 
 **⚠️ KEY CORRECTION FROM OLD PLAN:** Dayhomes arrive via **API intake webhook** from the external Application Portal (pre-approved, status `ACTIVE`), not via manual registration by `DAYHOME_OWNER`. The `PENDING` status is not used in this system.
 
+**Key architectural change:** The Application Portal is the entry point; our system is the source of truth. The portal pushes a rich nested payload on intake, and we push status/compliance/profile/document updates back via callback endpoints.
+
 **Stories:**
 
-| ID    | Story                                                             | Backend | Frontend |
-| ----- | ----------------------------------------------------------------- | ------- | -------- |
-| S2-01 | API intake webhook receives approved dayhome from external portal | ✅      | —        |
-| S2-02 | Dayhome management (list, detail, status transitions)             | ✅      | ✅       |
-| S2-03 | Room management (CRUD, capacity validation)                       | ✅      | ✅       |
-| S2-04 | Welcome email + owner account setup flow                          | ✅      | —        |
-| S2-05 | Dayhome dashboard with key metrics                                | ✅      | ✅       |
+| ID    | Story                                                                              | Backend | Frontend |
+| ----- | ---------------------------------------------------------------------------------- | ------- | -------- |
+| S2-01 | Dayhome model restructure — expanded schema matching portal payload                | ✅      | —        |
+| S2-02 | API intake webhook — HMAC, idempotency, field mapping, DAYHOME_OWNER user creation | ✅      | —        |
+| S2-03 | Document download + storage from signed URLs                                       | ✅      | —        |
+| S2-04 | Callback endpoints (status, compliance, profile, documents)                        | ✅      | —        |
+| S2-05 | Dayhome management (list, detail, status transitions)                              | ✅      | ✅       |
+| S2-06 | Room management (CRUD, capacity validation)                                        | ✅      | ✅       |
+| S2-07 | Welcome email + owner account setup flow                                           | ✅      | —        |
+| S2-08 | Web Dayhome portal scaffold (login, dashboard, rooms)                              | —       | ✅       |
 
 **Technical tasks:**
 
-- [ ] `POST /api/v1/dayhomes/intake` — HMAC signature verification, idempotency key dedup
-- [ ] Validate payload → map fields → create dayhome (ACTIVE)
+- [ ] S2-01: Dayhome model expansion + migration + IntakeLog model
+- [ ] S2-02: `POST /api/v1/dayhomes/intake` — HMAC verification, idempotency, replay protection, field mapping, create dayhome (ACTIVE) + user (DAYHOME_OWNER)
+- [ ] S2-03: Document fetch from signed URLs, R2/MinIO storage, Document record creation
+- [ ] S2-04: 4 callback endpoints — status, compliance, educator-profile, documents
 - [ ] Manual review queue for invalid payloads (flag → coordinator resolves)
 - [ ] Dayhome status transitions: ACTIVE ↔ SUSPENDED ↔ CLOSED
 - [ ] Room capacity validation (cannot reduce below current enrollment)
-- [ ] Dayhome events: `dayhome.intaken`, `dayhome.suspended`
-- [ ] `@OrganizationAccess()` guard
+- [ ] Dayhome events: `dayhome.intaken`, `dayhome.suspended`, `dayhome.activated`
 - [ ] Scaffold `apps/web-dayhome` (Next.js 14, Tailwind, shared ui-kit)
-- [ ] Web Admin: dayhome list with status filters, detail page
+- [ ] Web Admin: dayhome list with status filters, detail page, intake log
 - [ ] Web Dayhome: dashboard, room management
+- [ ] Welcome email via BullMQ on successful intake
 
 **Definition of Done:**
 
+- [ ] Dayhome model expanded with all intake fields + raw JSON audit trail
 - [ ] Intake webhook: invalid signature → 401, duplicate key → 409, bad payload → 422
-- [ ] API intake creates dayhome with validated data
+- [ ] API intake creates dayhome with validated data + DAYHOME_OWNER user
+- [ ] Documents downloaded from signed URLs and persisted
+- [ ] 4 callback endpoints accepting HMAC-signed updates
 - [ ] Invalid payloads flagged for manual review
 - [ ] Status transitions work (suspended blocks all operations)
 - [ ] Room capacity enforced at API level
 - [ ] Welcome email sends to dayhome owner
-- [ ] Web Dayhome portal scaffolded and serving pages
+- [ ] Web Admin: dayhome list, detail, intake log, room management working
+- [ ] Web Dayhome portal scaffolded with login, dashboard, room management
+- [ ] Integration tests cover intake, callbacks, status transitions, room CRUD
 
 ---
 

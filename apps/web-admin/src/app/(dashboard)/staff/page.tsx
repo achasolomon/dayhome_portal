@@ -2,6 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Card,
   CardContent,
@@ -25,6 +28,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
 } from '@spiced-dayhome/ui-kit';
 import {
   Users,
@@ -52,7 +59,7 @@ const badgePalette = [
 ];
 
 export default function StaffPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [roles, setRoles] = useState<RoleOption[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [pendingInvitations, setPendingInvitations] = useState<StaffInvitation[]>([]);
@@ -62,19 +69,35 @@ export default function StaffPage() {
   const [roleFilter, setRoleFilter] = useState('all');
 
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [invitePhone, setInvitePhone] = useState('');
-  const [inviteRole, setInviteRole] = useState('');
-  const [inviteSubmitting, setInviteSubmitting] = useState(false);
+
+  const inviteSchema = z.object({
+    email: z.string().email(t('validation.email')),
+    phone: z.string().optional(),
+    role: z.string().min(1),
+  });
+
+  type InviteForm = z.infer<typeof inviteSchema>;
+
+  const {
+    register: registerInvite,
+    handleSubmit: handleInviteSubmit,
+    reset: resetInvite,
+    watch: watchInvite,
+    formState: { errors: inviteErrors, isSubmitting: inviteSubmitting },
+    setValue: setInviteValue,
+  } = useForm<InviteForm>({
+    resolver: zodResolver(inviteSchema),
+    defaultValues: { email: '', phone: '', role: '' },
+  });
 
   const roleMap = new Map(roles.map((r, i) => [r.value, { label: r.label, colorIndex: i }]));
 
   useEffect(() => {
-    staffApi.getRoles().then((r) => {
+    void staffApi.getRoles().then((r) => {
       setRoles(r);
-      if (r.length > 0) setInviteRole(r[0].value);
+      if (r.length > 0) setInviteValue('role', r[0].value);
     });
-  }, []);
+  }, [setInviteValue]);
 
   const loadStaff = useCallback(async () => {
     try {
@@ -95,20 +118,15 @@ export default function StaffPage() {
     return () => clearTimeout(timer);
   }, [loadStaff]);
 
-  async function handleInvite() {
-    if (!inviteEmail.trim()) return;
+  async function onInvite(data: InviteForm) {
     try {
-      setInviteSubmitting(true);
-      await staffApi.invite({ email: inviteEmail.trim(), role: inviteRole, phone: invitePhone.trim() || undefined });
-      toast({ title: t('staff.invitationSent'), description: t('staff.invitationSentTo', { email: inviteEmail }), variant: 'success' });
+      await staffApi.invite({ email: data.email.trim(), role: data.role, phone: data.phone?.trim() || undefined });
+      toast({ title: t('staff.invitationSent'), description: t('staff.invitationSentTo', { email: data.email }), variant: 'success' });
       setInviteOpen(false);
-      setInviteEmail('');
-      setInvitePhone('');
+      resetInvite();
       await loadStaff();
     } catch {
       toast({ title: t('staff.failedToSend'), description: t('staff.tryAgain'), variant: 'error' });
-    } finally {
-      setInviteSubmitting(false);
     }
   }
 
@@ -164,28 +182,29 @@ export default function StaffPage() {
                 </div>
               </div>
             </SheetHeader>
+            <form onSubmit={handleInviteSubmit(onInvite)}>
             <SheetBody className="space-y-5">
               <Input
                 id="invite-email"
                 label={t('staff.inviteEmail')}
                 type="email"
                 placeholder="colleague@spiced.ca"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
-                autoFocus
+                error={inviteErrors.email && t(inviteErrors.email.message as string)}
+                {...registerInvite('email')}
               />
               <Input
                 id="invite-phone"
                 label={t('staff.invitePhone')}
                 type="tel"
                 placeholder="+1-403-555-0123"
-                value={invitePhone}
-                onChange={(e) => setInvitePhone(e.target.value)}
+                {...registerInvite('phone')}
               />
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">{t('staff.role')}</label>
-                <Select value={inviteRole} onValueChange={setInviteRole}>
+                <Select
+                  value={watchInvite('role') || roles[0]?.value}
+                  onValueChange={(v) => setInviteValue('role', v)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -195,13 +214,16 @@ export default function StaffPage() {
                     ))}
                   </SelectContent>
                 </Select>
+                {inviteErrors.role && (
+                  <p className="mt-1 text-sm text-error">{t(inviteErrors.role.message as string)}</p>
+                )}
               </div>
             </SheetBody>
             <SheetFooter>
               <Button variant="outline" disabled={inviteSubmitting} onClick={() => setInviteOpen(false)}>
                 {t('common.cancel')}
               </Button>
-              <Button onClick={handleInvite} disabled={inviteSubmitting}>
+              <Button type="submit" disabled={inviteSubmitting}>
                 {inviteSubmitting ? (
                   <><Loader2 className="h-4 w-4 animate-spin" /> {t('staff.sending')}</>
                 ) : (
@@ -209,6 +231,7 @@ export default function StaffPage() {
                 )}
               </Button>
             </SheetFooter>
+            </form>
           </SheetContent>
         </Sheet>
       </div>
@@ -272,33 +295,18 @@ export default function StaffPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-lg bg-muted p-1">
-        <button
-          onClick={() => setActiveTab('active')}
-          className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${
-            activeTab === 'active'
-              ? 'bg-white text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          {t('staff.activeStaff')}
-        </button>
-        <button
-          onClick={() => setActiveTab('pending')}
-          className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all ${
-            activeTab === 'pending'
-              ? 'bg-white text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          {t('staff.pendingInvitations')}
-          {pendingInvitations.length > 0 && (
-            <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber/15 px-1.5 text-[11px] font-semibold text-amber">
-              {pendingInvitations.length}
-            </span>
-          )}
-        </button>
-      </div>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'active' | 'pending')}>
+        <TabsList className="w-full">
+          <TabsTrigger value="active" className="flex-1">{t('staff.activeStaff')}</TabsTrigger>
+          <TabsTrigger value="pending" className="flex-1">
+            {t('staff.pendingInvitations')}
+            {pendingInvitations.length > 0 && (
+              <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber/15 px-1.5 text-[11px] font-semibold text-amber">
+                {pendingInvitations.length}
+              </span>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
       {/* Content */}
       {loading ? (
@@ -307,8 +315,10 @@ export default function StaffPage() {
             <div key={i} className="h-16 animate-pulse rounded-lg bg-muted" />
           ))}
         </div>
-      ) : activeTab === 'active' ? (
-        filteredStaff.length === 0 ? (
+      ) : (
+        <>
+        <TabsContent value="active">
+        {filteredStaff.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center gap-4 py-16">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
@@ -390,9 +400,10 @@ export default function StaffPage() {
               );
             })}
           </div>
-        )
-      ) : (
-        pendingInvitations.length === 0 ? (
+        )}
+        </TabsContent>
+        <TabsContent value="pending">
+        {pendingInvitations.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center gap-4 py-16">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
@@ -417,7 +428,7 @@ export default function StaffPage() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{inv.email}</p>
                   <p className="text-xs text-muted-foreground">
-                    {t('staff.expires', { date: new Date(inv.expiresAt).toLocaleDateString('en-US', {
+                    {t('staff.expires', { date: new Date(inv.expiresAt).toLocaleDateString(i18n.language, {
                       month: 'short', day: 'numeric', year: 'numeric'
                     }) })}
                   </p>
@@ -449,8 +460,11 @@ export default function StaffPage() {
               </div>
             ))}
           </div>
-        )
+        )}
+        </TabsContent>
+        </>
       )}
+    </Tabs>
     </div>
   );
 }

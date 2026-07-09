@@ -17,7 +17,18 @@
     "messages": "Messages",
     "reports": "Rapports",
     "settings": "Paramètres",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "staff": "Personnel",
+    "invoices": "Factures",
+    "usersRoles": "Utilisateurs et rôles",
+    "notifications": "Notifications",
+    "auditLog": "Journal d'audit",
+    "groups": {
+      "main": "Principal",
+      "management": "Gestion",
+      "operations": "Opérations",
+      "settings": "Paramètres"
+    }
   },
   "auth": {
     "login": "Connexion",
@@ -56,7 +67,29 @@
     "newPassword": "Nouveau mot de passe",
     "min6Chars": "Min. 6 caractères",
     "reEnterPassword": "Resaisissez votre mot de passe",
-    "resetting": "Réinitialisation en cours..."
+    "resetting": "Réinitialisation en cours...",
+    "createAccount": "Créer un compte",
+    "creatingAccount": "Création du compte...",
+    "alreadyHaveAccount": "Vous avez déjà un compte?",
+    "acceptInvite": "Compléter l'inscription",
+    "invitedAs": "Vous avez été invité en tant que {{role}} — {{email}}",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "phoneNumber": "Numéro de téléphone",
+    "atLeast8Chars": "Au moins 8 caractères",
+    "repeatPassword": "Répétez votre mot de passe",
+    "accountCreated": "Compte créé!",
+    "accountCreatedDescription": "Bienvenue à Spiced Dayhome. Redirection vers le tableau de bord...",
+    "invalidInvitation": "Invitation invalide",
+    "validatingInvitation": "Validation de votre invitation...",
+    "noInvitationToken": "Aucun jeton d'invitation fourni. Veuillez vérifier le lien que vous avez reçu.",
+    "invitationFailed": "Échec de l'acceptation de l'invitation",
+    "validationFailed": "Impossible de valider l'invitation. Veuillez réessayer.",
+    "firstNameRequired": "Le prénom est requis",
+    "lastNameRequired": "Le nom est requis",
+    "passwordMinLength": "Le mot de passe doit contenir au moins 8 caractères",
+    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+    "welcome": "Bonjour! Bienvenue chez {{name}}. Continuez vers la connexion."
   },
   "common": {
     "loading": "Chargement...",
@@ -89,7 +122,8 @@
     "thisWeek": "Cette semaine",
     "thisMonth": "Ce mois",
     "customRange": "Période personnalisée",
-    "pending": "En attente"
+    "pending": "En attente",
+    "deleting": "Suppression..."
   },
   "staff": {
     "pageTitle": "Personnel",
@@ -151,7 +185,25 @@
     "failedToDelete": "Échec de la suppression du rôle",
     "permissionsUpdated": "Permissions mises à jour",
     "changesSaved": "Modifications enregistrées pour {{role}}",
-    "roleDeleted": "Rôle supprimé"
+    "roleDeleted": "Rôle supprimé",
+    "createCustomRole": "Créer un rôle personnalisé",
+    "defineNewRole": "Définissez un nouveau rôle avec une clé unique et un libellé. Vous pourrez ensuite attribuer des permissions dans la matrice.",
+    "roleKey": "Clé du rôle",
+    "roleKeyPlaceholder": "p. ex. CUSTOM_MANAGER",
+    "roleKeyHint": "Lettres majuscules, chiffres et tirets bas uniquement",
+    "displayLabel": "Libellé",
+    "displayLabelPlaceholder": "p. ex. Custom Manager",
+    "creating": "Création en cours...",
+    "roleCreated": "Rôle créé",
+    "failedToCreateRole": "Échec de la création du rôle"
+  },
+  "header": {
+    "profile": "Profil",
+    "logout": "Déconnexion",
+    "loggingOut": "Déconnexion en cours...",
+    "expandSidebar": "Agrandir la barre latérale",
+    "collapseSidebar": "Réduire la barre latérale",
+    "toggleNav": "Afficher/masquer le menu de navigation"
   },
   "validation": {
     "required": "Ce champ est requis",

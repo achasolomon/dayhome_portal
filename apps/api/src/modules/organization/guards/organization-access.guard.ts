@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { ERROR_CODES } from '@spiced-dayhome/shared-types';
 import { Organization } from '../entities/organization.entity';
 
 @Injectable()
@@ -30,7 +31,7 @@ export class OrganizationAccessGuard implements CanActivate {
 
     if (user.organizationId !== orgId) {
       throw new ForbiddenException({
-        code: 'FORBIDDEN_ORGANIZATION',
+        code: ERROR_CODES.FORBIDDEN_ORGANIZATION,
         message: 'You do not have access to this organization.',
       });
     }

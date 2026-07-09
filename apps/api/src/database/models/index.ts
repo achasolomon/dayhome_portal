@@ -13,3 +13,5 @@ export { AuditLog } from './audit-log.model';
 export { Invitation } from './invitation.model';
 export { RolePermission } from './role-permission.model';
 export { Role } from './role.model';
+export { OrganizationSettings } from './organization-settings.model';
+export { IntakeLog } from './intake-log.model';

@@ -5,20 +5,20 @@
 
 ## IN SCOPE
 
-| ID     | Deliverable                                                                  | Backend | Frontend |
-| ------ | ---------------------------------------------------------------------------- | ------- | -------- |
-| S10-01 | Educator mobile app (Expo): check-in/out, daily board, activities, incidents | ✅      | ✅       |
-| S10-02 | Parent mobile app (Expo): notifications, child feed, messaging, invoices     | ✅      | ✅       |
-| S10-03 | Offline check-in/out (WatermelonDB)                                          | ✅      | ✅       |
-| S10-04 | i18n: French locale complete (all strings translated)                        | â€”     | ✅       |
-| S10-05 | WCAG 2.1 AA accessibility audit + remediation                                | â€”     | ✅       |
-| S10-06 | Performance optimization (LCP, FID, API P95)                                 | ✅      | ✅       |
-| S10-07 | Push notification registration (FCM/APNs)                                    | ✅      | ✅       |
+| ID     | Deliverable                                                                  | Backend | Frontend | Tests      |
+| ------ | ---------------------------------------------------------------------------- | ------- | -------- | ---------- |
+| S10-01 | Educator mobile app (Expo): check-in/out, daily board, activities, incidents | ✅      | ✅       | ✅ BE + FE |
+| S10-02 | Parent mobile app (Expo): notifications, child feed, messaging, invoices     | ✅      | ✅       | ✅ BE + FE |
+| S10-03 | Offline check-in/out (WatermelonDB)                                          | ✅      | ✅       | ✅ BE + FE |
+| S10-04 | i18n: French locale complete (all strings translated)                        | —       | ✅       | ✅ FE      |
+| S10-05 | WCAG 2.1 AA accessibility audit + remediation                                | —       | ✅       | ✅ FE      |
+| S10-06 | Performance optimization (LCP, FID, API P95)                                 | ✅      | ✅       | ✅ BE + FE |
+| S10-07 | Push notification registration (FCM/APNs)                                    | ✅      | ✅       | ✅ BE + FE |
 
 ## NOT IN SCOPE
 
 - ❌ Curriculum planning, developmental portfolios, meal plans (deferred to P3)
-- ❌ No new backend feature modules â€” only mobile-optimized endpoints + sync
+- ❌ No new backend feature modules — only mobile-optimized endpoints + sync
 - ❌ No Android/iOS-specific native modules (Expo managed workflow only)
 - ❌ No real SMS gateway (Twilio) â€” mock remains; real integration if time permits
 - ❌ No Apple Watch / Android Wear companion apps
@@ -39,6 +39,15 @@
 - **DTOs**: `class-validator` on backend; Zod on frontend
 - **i18n**: Every user-visible string uses `useTranslation()` + `t('key')`
 - **Migrations**: Every schema change has a migration
+
+### Testing Requirements
+
+- **Framework**: Jest (backend), Jest + React Testing Library (frontend)
+- **API tests**: Supertest for all endpoint integration tests
+- **Coverage target**: ≥80% line coverage per module
+- **Test patterns**: Unit tests for services/repositories; integration tests for controllers/endpoints
+- **Per-item expectations**: Each deliverable must have happy-path, validation-error, auth/permission-denial, and edge-case tests
+- **CI enforcement**: `pnpm test:cov` must pass before merge; lint + typecheck gates
 
 ## User Stories
 

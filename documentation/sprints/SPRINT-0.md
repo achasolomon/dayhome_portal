@@ -7,22 +7,22 @@
 
 ## IN SCOPE
 
-| ID    | Item                                                                             | Status     |
-| ----- | -------------------------------------------------------------------------------- | ---------- |
-| S0-01 | Monorepo scaffold (pnpm workspaces + Turborepo)                                  | ✅ Done    |
-| S0-02 | All 10+ Sequelize models + first migration + seed                                | ✅ Done    |
-| S0-03 | NestJS API scaffold with auth module (JWT dual-token login, refresh)             | ✅ Done    |
-| S0-04 | `shared-types` package with `ApiResponse<T>`, `PaginatedResponse<T>`, `ApiError` | ✅ Done    |
-| S0-05 | UI Kit (shadcn/ui wrappers) in `packages/ui-kit`                                 | ✅ Done    |
-| S0-06 | Web Admin Next.js 14 app (App Router, Tailwind, Zustand, axios, TanStack Query)  | ✅ Done    |
-| S0-07 | Docker Compose (Postgres, Redis, MinIO, ClamAV, Mailpit, Prometheus, Grafana)    | ✅ Done    |
-| S0-08 | Infra config (Prometheus, Grafana dashboards, ClamAV scanning)                   | ✅ Done    |
-| S0-09 | Seed script (org + super admin user)                                             | ✅ Done    |
-| S0-10 | ESLint, Prettier, tsconfig.base.json                                             | ✅ Done    |
-| S0-11 | i18n scaffold (`react-i18next`, locale detection, `t()` utility)                 | 🔷 Partial |
-| S0-12 | a11y ESLint plugin (`eslint-plugin-jsx-a11y`)                                    | ⬜ Pending |
-| S0-13 | Queue Dashboard (Bull Board UI at `/api/v1/admin/queues`)                        | ⬜ Pending |
-| S0-14 | AuthService unit tests + auth endpoint integration tests                         | ⬜ Pending |
+| ID    | Item                                                                             | Status     | Tests |
+| ----- | -------------------------------------------------------------------------------- | ---------- | ----- |
+| S0-01 | Monorepo scaffold (pnpm workspaces + Turborepo)                                  | ✅ Done    | —     |
+| S0-02 | All 10+ Sequelize models + first migration + seed                                | ✅ Done    | —     |
+| S0-03 | NestJS API scaffold with auth module (JWT dual-token login, refresh)             | ✅ Done    | ✅    |
+| S0-04 | `shared-types` package with `ApiResponse<T>`, `PaginatedResponse<T>`, `ApiError` | ✅ Done    | ✅    |
+| S0-05 | UI Kit (shadcn/ui wrappers) in `packages/ui-kit`                                 | ✅ Done    | —     |
+| S0-06 | Web Admin Next.js 14 app (App Router, Tailwind, Zustand, axios, TanStack Query)  | ✅ Done    | —     |
+| S0-07 | Docker Compose (Postgres, Redis, MinIO, ClamAV, Mailpit, Prometheus, Grafana)    | ✅ Done    | —     |
+| S0-08 | Infra config (Prometheus, Grafana dashboards, ClamAV scanning)                   | ✅ Done    | —     |
+| S0-09 | Seed script (org + super admin user)                                             | ✅ Done    | —     |
+| S0-10 | ESLint, Prettier, tsconfig.base.json                                             | ✅ Done    | —     |
+| S0-11 | i18n scaffold (`react-i18next`, locale detection, `t()` utility)                 | 🔷 Partial | ✅    |
+| S0-12 | a11y ESLint plugin (`eslint-plugin-jsx-a11y`)                                    | ⬜ Pending | ✅    |
+| S0-13 | Queue Dashboard (Bull Board UI at `/api/v1/admin/queues`)                        | ⬜ Pending | ✅    |
+| S0-14 | AuthService unit tests + auth endpoint integration tests                         | ⬜ Pending | ✅    |
 
 ## NOT IN SCOPE (Explicit Exclusions)
 
@@ -48,6 +48,15 @@
 - **Sequelize conventions**: `paranoid: true` for soft delete, `CreatedAt`/`UpdatedAt` columns, UUID primary keys
 - **API prefix**: `/api/v1/`
 - **CORS**: Configured for frontend URLs from env
+
+### Testing Requirements
+
+- **Framework**: Jest (backend), Jest + React Testing Library (frontend)
+- **API tests**: Supertest for all endpoint integration tests
+- **Coverage target**: ≥80% line coverage per module
+- **Test patterns**: Unit tests for services/repositories; integration tests for controllers/endpoints
+- **Per-item expectations**: Each deliverable must have happy-path, validation-error, auth/permission-denial, and edge-case tests
+- **CI enforcement**: `pnpm test:cov` must pass before merge; lint + typecheck gates
 
 ---
 

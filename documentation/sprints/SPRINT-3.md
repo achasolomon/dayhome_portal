@@ -7,14 +7,14 @@
 
 ## IN SCOPE
 
-| ID    | Deliverable                                                        | Backend | Frontend |
-| ----- | ------------------------------------------------------------------ | ------- | -------- |
-| S3-01 | Educator CRUD with profile info, certifications, background check  | ✅      | ✅       |
-| S3-02 | Shift scheduling: weekly patterns with overflow/override support   | ✅      | ✅       |
-| S3-03 | PTO request → approval with educator:child ratio validation        | ✅      | ✅       |
-| S3-04 | Time clock: clock-in/out with timestamps, daily summary            | ✅      | ✅       |
-| S3-05 | Certification tracking with expiry dates and auto-alerts           | ✅      | —        |
-| S3-06 | `@OrganizationAccess()` guard implementation on educator endpoints | ✅      | —        |
+| ID    | Deliverable                                                        | Backend | Frontend | Tests      |
+| ----- | ------------------------------------------------------------------ | ------- | -------- | ---------- |
+| S3-01 | Educator CRUD with profile info, certifications, background check  | ✅      | ✅       | ✅ BE + FE |
+| S3-02 | Shift scheduling: weekly patterns with overflow/override support   | ✅      | ✅       | ✅ BE + FE |
+| S3-03 | PTO request → approval with educator:child ratio validation        | ✅      | ✅       | ✅ BE + FE |
+| S3-04 | Time clock: clock-in/out with timestamps, daily summary            | ✅      | ✅       | ✅ BE + FE |
+| S3-05 | Certification tracking with expiry dates and auto-alerts           | ✅      | —        | ✅ BE      |
+| S3-06 | `@OrganizationAccess()` guard implementation on educator endpoints | ✅      | —        | ✅ BE      |
 
 ## NOT IN SCOPE
 
@@ -38,6 +38,15 @@
 - **Migrations**: Every schema change has a migration
 - **Event-driven**: PTO approvals/rejections, schedule changes, time corrections emit events
 - **Data isolation**: Educator can only see own schedule (role scoping via `@OrganizationAccess()`)
+
+### Testing Requirements
+
+- **Framework**: Jest (backend), Jest + React Testing Library (frontend)
+- **API tests**: Supertest for all endpoint integration tests
+- **Coverage target**: ≥80% line coverage per module
+- **Test patterns**: Unit tests for services/repositories; integration tests for controllers/endpoints
+- **Per-item expectations**: Each deliverable must have happy-path, validation-error, auth/permission-denial, and edge-case tests
+- **CI enforcement**: `pnpm test:cov` must pass before merge; lint + typecheck gates
 
 ## User Stories
 

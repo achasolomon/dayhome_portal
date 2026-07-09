@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
+import { QueuesService } from '../queues/queues.service';
 import { User } from '../users/entities/user.model';
 
 jest.mock('bcryptjs', () => ({
@@ -39,6 +40,13 @@ describe('AuthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
+        {
+          provide: QueuesService,
+          useValue: {
+            queueInviteEmail: jest.fn(),
+            queueResetPasswordEmail: jest.fn(),
+          },
+        },
         {
           provide: UsersService,
           useValue: {

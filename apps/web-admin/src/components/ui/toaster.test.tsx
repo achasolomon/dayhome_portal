@@ -29,6 +29,6 @@ describe('Toaster', () => {
 
     const el = await screen.findByText('Error');
     const toastRoot = el.closest('[class*="border"]');
-    expect(toastRoot?.className).toContain('border-error');
+    expect(toastRoot?.className).toContain('border-destructive');
   });
 });

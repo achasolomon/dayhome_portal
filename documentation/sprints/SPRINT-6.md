@@ -5,14 +5,14 @@
 
 ## IN SCOPE
 
-| ID    | Deliverable                                                   | Backend | Frontend |
-| ----- | ------------------------------------------------------------- | ------- | -------- |
-| S6-01 | Invoice auto-generation from attendance (BullMQ weekly job)   | ✅      | ✅       |
-| S6-02 | Payment tracking (mock or Stripe sandbox)                     | ✅      | ✅       |
-| S6-03 | Subsidy management (percentage or fixed amount, auto-applied) | ✅      | ✅       |
-| S6-04 | Financial reports (revenue, AR aging, subsidy totals)         | ✅      | ✅       |
-| S6-05 | Credits & refunds management                                  | ✅      | ✅       |
-| S6-06 | Parent invoice view + payment history                         | ✅      | ✅       |
+| ID    | Deliverable                                                   | Backend | Frontend | Tests      |
+| ----- | ------------------------------------------------------------- | ------- | -------- | ---------- |
+| S6-01 | Invoice auto-generation from attendance (BullMQ weekly job)   | ✅      | ✅       | ✅ BE + FE |
+| S6-02 | Payment tracking (mock or Stripe sandbox)                     | ✅      | ✅       | ✅ BE + FE |
+| S6-03 | Subsidy management (percentage or fixed amount, auto-applied) | ✅      | ✅       | ✅ BE + FE |
+| S6-04 | Financial reports (revenue, AR aging, subsidy totals)         | ✅      | ✅       | ✅ BE + FE |
+| S6-05 | Credits & refunds management                                  | ✅      | ✅       | ✅ BE + FE |
+| S6-06 | Parent invoice view + payment history                         | ✅      | ✅       | ✅ BE + FE |
 
 ## NOT IN SCOPE
 
@@ -129,6 +129,15 @@ modules/billing/
 | Data retention   | Invoices/payments retained 7 years (CRA/IRS requirement)                                                             |
 | Security         | Financial data visible only to ORG_ADMIN, DAYHOME_OWNER, and the parent-family; never exposed to other roles         |
 | Performance      | Invoice list paginated; financial reports use materialized views for large datasets                                  |
+
+### Testing Requirements
+
+- **Framework**: Jest (backend), Jest + React Testing Library (frontend)
+- **API tests**: Supertest for all endpoint integration tests
+- **Coverage target**: ≥80% line coverage per module
+- **Test patterns**: Unit tests for services/repositories; integration tests for controllers/endpoints
+- **Per-item expectations**: Each deliverable must have happy-path, validation-error, auth/permission-denial, and edge-case tests
+- **CI enforcement**: `pnpm test:cov` must pass before merge; lint + typecheck gates
 
 ---
 

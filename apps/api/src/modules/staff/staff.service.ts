@@ -17,6 +17,7 @@ import { StaffQueryDto } from './dto/staff-query.dto';
 import { CheckInvitationDto } from './dto/check-invitation.dto';
 import { STAFF_ROLES } from './dto/invite-staff.dto';
 import { QueuesService } from '../../queues/queues.service';
+import { ERROR_CODES } from '@spiced-dayhome/shared-types';
 import { Invitation, User } from '../staff/entities/staff.entity';
 
 @Injectable()
@@ -68,7 +69,7 @@ export class StaffService implements OnModuleInit {
     );
     if (existing) {
       throw new ConflictException({
-        code: 'INVITATION_PENDING',
+        code: ERROR_CODES.INVITATION_PENDING,
         message: 'A pending invitation already exists for this email.',
       });
     }
@@ -121,13 +122,13 @@ export class StaffService implements OnModuleInit {
     const invitation = await this.repository.findInvitationById(id);
     if (!invitation || invitation.organizationId !== organizationId) {
       throw new NotFoundException({
-        code: 'INVITATION_NOT_FOUND',
+        code: ERROR_CODES.INVITATION_NOT_FOUND,
         message: 'Invitation not found.',
       });
     }
     if (invitation.status !== 'PENDING') {
       throw new BadRequestException({
-        code: 'INVITATION_NOT_PENDING',
+        code: ERROR_CODES.INVITATION_NOT_PENDING,
         message: `Cannot cancel an invitation that is ${invitation.status.toLowerCase()}.`,
       });
     }
@@ -138,19 +139,19 @@ export class StaffService implements OnModuleInit {
     const invitation = await this.repository.findInvitationById(id);
     if (!invitation || invitation.organizationId !== organizationId) {
       throw new NotFoundException({
-        code: 'INVITATION_NOT_FOUND',
+        code: ERROR_CODES.INVITATION_NOT_FOUND,
         message: 'Invitation not found.',
       });
     }
     if (invitation.status !== 'PENDING') {
       throw new BadRequestException({
-        code: 'INVITATION_NOT_PENDING',
+        code: ERROR_CODES.INVITATION_NOT_PENDING,
         message: `Cannot resend an invitation that is ${invitation.status.toLowerCase()}.`,
       });
     }
     if (new Date() > invitation.expiresAt) {
       throw new BadRequestException({
-        code: 'INVITATION_EXPIRED',
+        code: ERROR_CODES.INVITATION_EXPIRED,
         message: 'Invitation has expired. Please send a new invitation.',
       });
     }
@@ -192,19 +193,19 @@ export class StaffService implements OnModuleInit {
     const invitation = await this.repository.findInvitationByToken(dto.token);
     if (!invitation) {
       throw new NotFoundException({
-        code: 'INVITATION_NOT_FOUND',
+        code: ERROR_CODES.INVITATION_NOT_FOUND,
         message: 'Invitation not found or has been revoked.',
       });
     }
     if (invitation.status !== 'PENDING') {
       throw new BadRequestException({
-        code: 'INVITATION_NOT_PENDING',
+        code: ERROR_CODES.INVITATION_NOT_PENDING,
         message: `Invitation is already ${invitation.status.toLowerCase()}.`,
       });
     }
     if (new Date() > invitation.expiresAt) {
       throw new BadRequestException({
-        code: 'INVITATION_EXPIRED',
+        code: ERROR_CODES.INVITATION_EXPIRED,
         message: 'Invitation has expired. Please request a new one.',
       });
     }
@@ -214,7 +215,7 @@ export class StaffService implements OnModuleInit {
     });
     if (existingUser) {
       throw new ConflictException({
-        code: 'EMAIL_ALREADY_REGISTERED',
+        code: ERROR_CODES.EMAIL_ALREADY_REGISTERED,
         message: 'A user with this email already exists.',
       });
     }

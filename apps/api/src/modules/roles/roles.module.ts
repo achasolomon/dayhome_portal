@@ -3,13 +3,14 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { RolesController } from './roles.controller';
 import { RolesService } from './roles.service';
 import { RolesRepository } from './roles.repository';
+import { RolesAccessGuard } from './guards/roles-access.guard';
 import { RolePermission } from '../../database/models/role-permission.model';
 import { Role } from '../../database/models/role.model';
 
 @Module({
   imports: [SequelizeModule.forFeature([RolePermission, Role])],
   controllers: [RolesController],
-  providers: [RolesService, RolesRepository],
+  providers: [RolesService, RolesRepository, RolesAccessGuard],
   exports: [RolesService],
 })
 export class RolesModule {}

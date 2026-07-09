@@ -13,8 +13,10 @@ import { RolesService } from './roles.service';
 import { UpdatePermissionsDto } from './dto/update-permissions.dto';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { RolesApiResponse, RoleWithPermissions } from './dto/role-response.dto';
+import { AuditLog } from '../audit-log/audit-log.decorator';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
+import { RolesAccessGuard } from './guards/roles-access.guard';
 import { Roles as RolesDecorator } from '../../auth/roles.decorator';
 
 @ApiTags('Roles')
@@ -23,7 +25,7 @@ export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Get('permissions')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, RolesAccessGuard)
   @RolesDecorator('ORG_ADMIN', 'ORG_MANAGER')
   @ApiOperation({ summary: 'Get all roles with their permissions' })
   @ApiResponse({ status: 200, description: 'Role-permission matrix' })
@@ -32,8 +34,9 @@ export class RolesController {
   }
 
   @Patch('permissions/:role')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, RolesAccessGuard)
   @RolesDecorator('ORG_ADMIN')
+  @AuditLog({ action: 'roles.update', entity: 'Role' })
   @ApiOperation({ summary: 'Update permissions for a role' })
   @ApiResponse({ status: 200, description: 'Permissions updated' })
   async updateRolePermissions(
@@ -44,8 +47,9 @@ export class RolesController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, RolesAccessGuard)
   @RolesDecorator('ORG_ADMIN')
+  @AuditLog({ action: 'roles.create', entity: 'Role' })
   @ApiOperation({ summary: 'Create a new custom role' })
   @ApiResponse({ status: 201, description: 'Role created' })
   async createRole(@Body() dto: CreateRoleDto): Promise<RoleWithPermissions> {
@@ -53,8 +57,9 @@ export class RolesController {
   }
 
   @Delete(':role')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, RolesAccessGuard)
   @RolesDecorator('ORG_ADMIN')
+  @AuditLog({ action: 'roles.remove', entity: 'Role' })
   @ApiOperation({ summary: 'Delete a custom role' })
   @ApiResponse({ status: 200, description: 'Role deleted' })
   async deleteRole(@Param('role') role: string): Promise<void> {

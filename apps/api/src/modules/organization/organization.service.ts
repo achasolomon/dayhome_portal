@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import { ERROR_CODES } from '@spiced-dayhome/shared-types';
 import { OrganizationRepository } from './organization.repository';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
@@ -17,7 +18,7 @@ export class OrganizationService {
     const existing = await this.repository.findByEmail(dto.email);
     if (existing) {
       throw new ConflictException({
-        code: 'DUPLICATE_EMAIL',
+        code: ERROR_CODES.DUPLICATE_EMAIL,
         message: 'An organization with this email already exists.',
       });
     }
@@ -42,7 +43,7 @@ export class OrganizationService {
     const org = await this.repository.findById(id);
     if (!org) {
       throw new NotFoundException({
-        code: 'ORGANIZATION_NOT_FOUND',
+        code: ERROR_CODES.ORGANIZATION_NOT_FOUND,
         message: `Organization not found with id ${id}`,
       });
     }
@@ -58,7 +59,7 @@ export class OrganizationService {
       });
       if (existing) {
         throw new ConflictException({
-          code: 'DUPLICATE_EMAIL',
+          code: ERROR_CODES.DUPLICATE_EMAIL,
           message: 'An organization with this email already exists.',
         });
       }
@@ -71,7 +72,7 @@ export class OrganizationService {
     });
     if (!updated) {
       throw new NotFoundException({
-        code: 'ORGANIZATION_NOT_FOUND',
+        code: ERROR_CODES.ORGANIZATION_NOT_FOUND,
         message: `Organization not found with id ${id}`,
       });
     }

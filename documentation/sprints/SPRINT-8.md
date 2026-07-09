@@ -5,14 +5,14 @@
 
 ## IN SCOPE
 
-| ID    | Deliverable                                                    | Backend | Frontend |
-| ----- | -------------------------------------------------------------- | ------- | -------- |
-| S8-01 | Thread-based messaging (parent ↔ educator) with read receipts  | ✅      | ✅       |
-| S8-02 | Announcement broadcasts (admin → all parents)                  | ✅      | ✅       |
-| S8-03 | Push notifications (FCM/APNs/Web Push) + in-app Socket.io      | ✅      | ✅       |
-| S8-04 | Activity logging per child (meals, naps, diaper, mood, photos) | ✅      | ✅       |
-| S8-05 | Incident reports with parent e-signature acknowledgment        | ✅      | ✅       |
-| S8-06 | Notification preferences (channel + type toggles per user)     | ✅      | ✅       |
+| ID    | Deliverable                                                    | Backend | Frontend | Tests      |
+| ----- | -------------------------------------------------------------- | ------- | -------- | ---------- |
+| S8-01 | Thread-based messaging (parent ↔ educator) with read receipts  | ✅      | ✅       | ✅ BE + FE |
+| S8-02 | Announcement broadcasts (admin → all parents)                  | ✅      | ✅       | ✅ BE + FE |
+| S8-03 | Push notifications (FCM/APNs/Web Push) + in-app Socket.io      | ✅      | ✅       | ✅ BE + FE |
+| S8-04 | Activity logging per child (meals, naps, diaper, mood, photos) | ✅      | ✅       | ✅ BE + FE |
+| S8-05 | Incident reports with parent e-signature acknowledgment        | ✅      | ✅       | ✅ BE + FE |
+| S8-06 | Notification preferences (channel + type toggles per user)     | ✅      | ✅       | ✅ BE + FE |
 
 ## NOT IN SCOPE
 
@@ -37,6 +37,15 @@
 - **i18n**: Every user-visible string uses `useTranslation()` + `t('key')`
 - **Migrations**: Every schema change has a migration
 - **Socket.io**: Real-time badge counts, message delivery, notification alerts
+
+### Testing Requirements
+
+- **Framework**: Jest (backend), Jest + React Testing Library (frontend)
+- **API tests**: Supertest for all endpoint integration tests
+- **Coverage target**: ≥80% line coverage per module
+- **Test patterns**: Unit tests for services/repositories; integration tests for controllers/endpoints
+- **Per-item expectations**: Each deliverable must have happy-path, validation-error, auth/permission-denial, and edge-case tests
+- **CI enforcement**: `pnpm test:cov` must pass before merge; lint + typecheck gates
 
 ## User Stories
 

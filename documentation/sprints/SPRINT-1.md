@@ -9,32 +9,32 @@
 
 ## IN SCOPE
 
-| ID    | Deliverable                                                                            | Backend | Frontend |
-| ----- | -------------------------------------------------------------------------------------- | ------- | -------- |
-| S1-01 | Single org profile: `GET /api/v1/organizations/:id`, `PATCH /api/v1/organizations/:id` | ✅ ✅   | —        |
-| S1-02 | Staff invitation: `POST /api/v1/staff/invite`, `GET /api/v1/staff`, resend, cancel     | ✅      | ✅       |
-| S1-03 | RBAC: Roles & Permissions CRUD, `@Permissions()` decorator on staff endpoints          | ✅      | ✅       |
-| S1-04 | Password reset: `POST /auth/forgot-password`, `POST /auth/reset-password`              | ✅      | ✅       |
-| S1-05 | Audit log viewer (backend endpoints only — frontend out of scope)                      | ✅      | —        |
-| S1-06 | Org operational settings (holidays, hours, ratios) — backend only                      | ✅      | —        |
+| ID    | Deliverable                                                                            | Backend | Frontend | Tests      |
+| ----- | -------------------------------------------------------------------------------------- | ------- | -------- | ---------- |
+| S1-01 | Single org profile: `GET /api/v1/organizations/:id`, `PATCH /api/v1/organizations/:id` | ✅      | —        | ✅ BE      |
+| S1-02 | Staff invitation: `POST /api/v1/staff/invite`, `GET /API/v1/staff`, resend, cancel     | ✅      | ✅       | ✅ BE + FE |
+| S1-03 | RBAC: Roles & Permissions CRUD, `@Permissions()` decorator on staff endpoints          | ✅      | ✅       | ✅ BE + FE |
+| S1-04 | Password reset: `POST /auth/forgot-password`, `POST /auth/reset-password`              | ✅      | ✅       | ✅ BE + FE |
+| S1-05 | Audit log viewer (backend endpoints only — frontend out of scope)                      | ✅      | —        | ✅ BE      |
+| S1-06 | Org operational settings (holidays, hours, ratios) — backend only                      | ✅      | —        | ✅ BE      |
 
 **Backend-specific tasks:**
 
-- [ ] Organization module: `GET /api/v1/organizations/:id`, `PATCH /api/v1/organizations/:id` (no list, no create, no delete)
-- [ ] Staff module: invitation model with token + 7-day expiry, `POST /staff/invite`, `GET /staff`, `POST /staff/invitations/:id/resend`, `DELETE /staff/invitations/:id`
-- [ ] RBAC module: Role CRUD, permission groups, permission assignment, `@Permissions()` guard on all protected staff endpoints
-- [ ] Auth: `POST /auth/forgot-password` (sends email), `POST /auth/reset-password` (updates hash, 1h token expiry)
-- [ ] Rate limiting: `LoginThrottleGuard` — 5 attempts / 15 min per IP (Redis-backed)
-- [ ] BullMQ email queue integration for invitation + password reset emails
-- [ ] Audit logging: global decorator `@AuditLog('action')` capturing before/after on state changes
+- [x] Organization module: `GET /api/v1/organizations/:id`, `PATCH /api/v1/organizations/:id` (no list, no create, no delete)
+- [x] Staff module: invitation model with token + 7-day expiry, `POST /staff/invite`, `GET /staff`, `POST /staff/invitations/:id/resend`, `DELETE /staff/invitations/:id`
+- [x] RBAC module: Role CRUD, permission groups, permission assignment, `@Permissions()` guard on all protected staff endpoints
+- [x] Auth: `POST /auth/forgot-password` (sends email), `POST /auth/reset-password` (updates hash, 1h token expiry)
+- [x] Rate limiting: `LoginThrottleGuard` — 5 attempts / 15 min per IP (Redis-backed)
+- [x] BullMQ email queue integration for invitation + password reset emails
+- [x] Audit logging: global decorator `@AuditLog('action')` capturing before/after on state changes
 
 **Frontend-specific tasks:**
 
-- [ ] `/staff` page: staff list with invite drawer, search, role badges, pending invitations tab
-- [ ] `/login` page: email + password with error handling
-- [ ] `/forgot-password` page: email input → confirmation screen
-- [ ] `/reset-password` page: token from URL → new password → success
-- [ ] All strings via `useTranslation()` + `t()` — no hardcoded English
+- [x] `/staff` page: staff list with invite drawer, search, role badges, pending invitations tab
+- [x] `/login` page: email + password with error handling
+- [x] `/forgot-password` page: email input → confirmation screen
+- [x] `/reset-password` page: token from URL → new password → success
+- [x] All strings via `useTranslation()` + `t()` — no hardcoded English
 
 ## NOT IN SCOPE (Explicit Exclusions)
 
@@ -61,6 +61,15 @@
 - **Migrations**: Every schema change has a corresponding migration file
 - **Error codes**: All thrown exceptions use defined error codes from `ERROR_CODES` in `shared-constants`
 - **Event-driven**: State-changing actions emit events (not inline audit + notification logic)
+
+### Testing Requirements
+
+- **Framework**: Jest (backend), Jest + React Testing Library (frontend)
+- **API tests**: Supertest for all endpoint integration tests
+- **Coverage target**: ≥80% line coverage per module
+- **Test patterns**: Unit tests for services/repositories; integration tests for controllers/endpoints
+- **Per-item expectations**: Each deliverable must have happy-path, validation-error, auth/permission-denial, and edge-case tests
+- **CI enforcement**: `pnpm test:cov` must pass before merge; lint + typecheck gates
 
 ---
 
@@ -150,13 +159,13 @@ modules/staff/
 
 ## Definition of Done
 
-- [ ] Single org profile endpoint (GET/PATCH) with guard
-- [ ] Staff invitation email sends via BullMQ queue with invitation link
-- [ ] Invited user can complete registration via set-password link
-- [ ] RBAC: staff users restricted to their assigned role's permissions
-- [ ] Audit logs created for all state changes
-- [ ] Org settings saved and applied to dayhome operations
-- [ ] Password reset flow works end-to-end
-- [ ] Integration tests cover auth failure scenarios (wrong password, expired token, locked account)
-- [ ] Frontend: Staff page with invite drawer, search, role badges, pending invitations
-- [ ] Accessibility: forms have proper labels, error messages linked via `aria-describedby`
+- [x] Single org profile endpoint (GET/PATCH) with guard
+- [x] Staff invitation email sends via BullMQ queue with invitation link
+- [x] Invited user can complete registration via set-password link
+- [x] RBAC: staff users restricted to their assigned role's permissions
+- [x] Audit logs created for all state changes
+- [x] Org settings saved and applied to dayhome operations
+- [x] Password reset flow works end-to-end
+- [x] Integration tests cover auth failure scenarios (wrong password, expired token, locked account) — Supertest e2e tests added
+- [x] Frontend: Staff page with invite drawer, search, role badges, pending invitations
+- [x] Accessibility: forms have proper labels, error messages linked via `aria-describedby` (ui-kit Input handles `aria-describedby` automatically via `error` prop)

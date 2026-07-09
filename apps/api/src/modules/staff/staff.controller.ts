@@ -14,9 +14,11 @@ import { AcceptInviteDto } from './dto/accept-invite.dto';
 import { StaffQueryDto } from './dto/staff-query.dto';
 import { InvitationResponseDto } from './dto/staff-response.dto';
 import { CheckInvitationDto } from './dto/check-invitation.dto';
+import { AuditLog } from '../audit-log/audit-log.decorator';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { PermissionsGuard } from '../../auth/permissions.guard';
+import { StaffAccessGuard } from './guards/staff-access.guard';
 import { Roles } from '../../auth/roles.decorator';
 import { Permissions } from '../../auth/permissions.decorator';
 import { CurrentUser } from '../../auth/current-user.decorator';
@@ -27,9 +29,10 @@ export class StaffController {
   constructor(private readonly staffService: StaffService) {}
 
   @Post('invite')
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard, StaffAccessGuard)
   @Roles('ORG_ADMIN')
   @Permissions('staff.invite')
+  @AuditLog({ action: 'staff.invite', entity: 'Invitation' })
   @ApiOperation({ summary: 'Invite a staff member to an organization' })
   @ApiResponse({ status: 201, description: 'Invitation sent' })
   async invite(
@@ -41,7 +44,7 @@ export class StaffController {
   }
 
   @Get('roles')
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard, StaffAccessGuard)
   @Roles('ORG_ADMIN', 'ORG_MANAGER')
   @Permissions('staff.list')
   @ApiOperation({ summary: 'Get available staff roles' })
@@ -51,7 +54,7 @@ export class StaffController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard, StaffAccessGuard)
   @Roles('ORG_ADMIN', 'ORG_MANAGER')
   @Permissions('staff.list')
   @ApiOperation({ summary: 'List staff members for the current organization' })
@@ -64,9 +67,10 @@ export class StaffController {
   }
 
   @Post('invitations/:id/resend')
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard, StaffAccessGuard)
   @Roles('ORG_ADMIN')
   @Permissions('staff.invite')
+  @AuditLog({ action: 'staff.resend', entity: 'Invitation' })
   @ApiOperation({ summary: 'Resend a pending invitation email' })
   @ApiResponse({ status: 200, description: 'Invitation resent' })
   async resendInvitation(
@@ -81,9 +85,10 @@ export class StaffController {
   }
 
   @Post('invitations/:id/cancel')
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard, StaffAccessGuard)
   @Roles('ORG_ADMIN')
   @Permissions('staff.remove')
+  @AuditLog({ action: 'staff.cancel', entity: 'Invitation' })
   @ApiOperation({ summary: 'Cancel a pending invitation' })
   @ApiResponse({ status: 200, description: 'Invitation cancelled' })
   async cancelInvitation(
@@ -104,6 +109,7 @@ export class StaffController {
   }
 
   @Post('accept-invite')
+  @AuditLog({ action: 'staff.accept', entity: 'Invitation' })
   @ApiOperation({ summary: 'Accept an invitation and create user account' })
   @ApiResponse({ status: 201, description: 'Account created' })
   async acceptInvite(

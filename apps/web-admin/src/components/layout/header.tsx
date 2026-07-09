@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { Menu, ArrowLeftFromLine, ArrowRightFromLine, User, Settings, LogOut } from 'lucide-react';
 import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@spiced-dayhome/ui-kit';
 import { useAuthStore } from '@/lib/stores/auth.store';
@@ -9,19 +10,19 @@ import { authApi } from '@/lib/api/auth';
 import { usePathname } from 'next/navigation';
 import { toast } from '@/components/ui/toaster';
 
-const pageTitles: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/staff': 'Staff',
-  '/dayhomes': 'Dayhomes',
-  '/educators': 'Educators',
-  '/families': 'Families',
-  '/children': 'Children',
-  '/attendance': 'Attendance',
-  '/invoices': 'Invoices',
-  '/documents': 'Documents',
-  '/users': 'Users & Roles',
-  '/profile': 'Profile',
-  '/settings': 'Settings',
+const pageTitleKeys: Record<string, string> = {
+  '/dashboard': 'nav.dashboard',
+  '/staff': 'nav.staff',
+  '/dayhomes': 'nav.dayhomes',
+  '/educators': 'nav.educators',
+  '/families': 'nav.families',
+  '/children': 'nav.children',
+  '/attendance': 'nav.attendance',
+  '/invoices': 'nav.invoices',
+  '/documents': 'nav.documents',
+  '/users': 'nav.usersRoles',
+  '/profile': 'header.profile',
+  '/settings': 'nav.settings',
 };
 
 interface HeaderProps {
@@ -31,12 +32,13 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick, collapsed, onToggleCollapse }: HeaderProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const [loggingOut, setLoggingOut] = useState(false);
-  const pageTitle = pageTitles[pathname] ?? '';
+  const pageTitle = pageTitleKeys[pathname] ? t(pageTitleKeys[pathname]) : '';
 
   const initials = user?.email
     ? user.email.charAt(0).toUpperCase()
@@ -62,8 +64,8 @@ export function Header({ onMenuClick, collapsed, onToggleCollapse }: HeaderProps
         size="icon"
         className="hidden shrink-0 text-muted-foreground lg:inline-flex"
         onClick={onToggleCollapse}
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        aria-label={collapsed ? t('header.expandSidebar') : t('header.collapseSidebar')}
+        title={collapsed ? t('header.expandSidebar') : t('header.collapseSidebar')}
       >
         {collapsed
           ? <ArrowRightFromLine className="h-4 w-4" />
@@ -76,7 +78,7 @@ export function Header({ onMenuClick, collapsed, onToggleCollapse }: HeaderProps
         size="icon"
         className="shrink-0 text-muted-foreground lg:hidden"
         onClick={onMenuClick}
-        aria-label="Toggle navigation menu"
+        aria-label={t('header.toggleNav')}
       >
         <Menu className="h-5 w-5" />
       </Button>
@@ -102,15 +104,15 @@ export function Header({ onMenuClick, collapsed, onToggleCollapse }: HeaderProps
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={() => router.push('/profile')}>
               <User className="mr-2 h-4 w-4" />
-              Profile
+              {t('header.profile')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push('/settings')}>
               <Settings className="mr-2 h-4 w-4" />
-              Settings
+              {t('nav.settings')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} disabled={loggingOut}>
               <LogOut className="mr-2 h-4 w-4" />
-              {loggingOut ? 'Logging out...' : 'Logout'}
+              {loggingOut ? t('header.loggingOut') : t('header.logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,6 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 import {
   Button,
   Input,
@@ -22,25 +25,33 @@ interface CreateRoleDrawerProps {
   onCreated: () => void;
 }
 
-export function CreateRoleDrawer({ open, onOpenChange, onCreated }: CreateRoleDrawerProps) {
-  const [roleKey, setRoleKey] = useState('');
-  const [roleLabel, setRoleLabel] = useState('');
-  const [creating, setCreating] = useState(false);
+const createRoleSchema = z.object({
+  roleKey: z.string().min(1).max(50).regex(/^[A-Z][A-Z0-9_]*$/, 'roles.roleKeyHint'),
+  roleLabel: z.string().min(1).max(100),
+});
 
-  async function handleCreate() {
-    if (!roleKey.trim() || !roleLabel.trim()) return;
+type CreateRoleForm = z.infer<typeof createRoleSchema>;
+
+export function CreateRoleDrawer({ open, onOpenChange, onCreated }: CreateRoleDrawerProps) {
+  const { t } = useTranslation();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateRoleForm>({
+    resolver: zodResolver(createRoleSchema),
+  });
+
+  async function onSubmit(data: CreateRoleForm) {
     try {
-      setCreating(true);
-      await rolesApi.createRole(roleKey.trim().toUpperCase(), roleLabel.trim());
-      toast({ title: 'Role created', variant: 'success' });
-      setRoleKey('');
-      setRoleLabel('');
+      await rolesApi.createRole(data.roleKey.toUpperCase(), data.roleLabel.trim());
+      toast({ title: t('roles.roleCreated'), variant: 'success' });
+      reset();
       onOpenChange(false);
       onCreated();
     } catch {
-      toast({ title: 'Failed to create role', description: 'Please try again.', variant: 'error' });
-    } finally {
-      setCreating(false);
+      toast({ title: t('roles.failedToCreateRole'), description: t('staff.tryAgain'), variant: 'error' });
     }
   }
 
@@ -49,45 +60,42 @@ export function CreateRoleDrawer({ open, onOpenChange, onCreated }: CreateRoleDr
       <SheetContent size="sm" onOpenAutoFocus={(e) => e.preventDefault()}>
         <SheetHeader>
           <div>
-            <SheetTitle>Create Custom Role</SheetTitle>
+            <SheetTitle>{t('roles.createCustomRole')}</SheetTitle>
             <SheetDescription>
-              Define a new role with a unique key and display label. You can then assign permissions in the matrix.
+              {t('roles.defineNewRole')}
             </SheetDescription>
           </div>
         </SheetHeader>
-        <SheetBody className="space-y-5">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Role Key</label>
-            <Input
-              placeholder="e.g. CUSTOM_MANAGER"
-              value={roleKey}
-              onChange={(e) => setRoleKey(e.target.value.toUpperCase())}
-            />
-            <p className="text-xs text-muted-foreground">
-              Uppercase letters, numbers, and underscores only
-            </p>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Display Label</label>
-            <Input
-              placeholder="e.g. Custom Manager"
-              value={roleLabel}
-              onChange={(e) => setRoleLabel(e.target.value)}
-            />
-          </div>
-        </SheetBody>
-        <SheetFooter>
-          <Button
-            onClick={handleCreate}
-            disabled={!roleKey.trim() || !roleLabel.trim() || creating}
-          >
-            {creating ? (
-              <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Creating...</>
-            ) : (
-              <><Plus className="mr-1.5 h-4 w-4" /> Create Role</>
-            )}
-          </Button>
-        </SheetFooter>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <SheetBody className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t('roles.roleKey')}</label>
+              <Input
+                placeholder={t('roles.roleKeyPlaceholder')}
+                error={errors.roleKey && t(errors.roleKey.message as string)}
+                {...register('roleKey', { setValueAs: (v: string) => v.toUpperCase() })}
+              />
+              <p className="text-xs text-muted-foreground">{t('roles.roleKeyHint')}</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t('roles.displayLabel')}</label>
+              <Input
+                placeholder={t('roles.displayLabelPlaceholder')}
+                error={errors.roleLabel && t(errors.roleLabel.message as string)}
+                {...register('roleLabel')}
+              />
+            </div>
+          </SheetBody>
+          <SheetFooter>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> {t('roles.creating')}</>
+              ) : (
+                <><Plus className="mr-1.5 h-4 w-4" /> {t('roles.createRole')}</>
+              )}
+            </Button>
+          </SheetFooter>
+        </form>
       </SheetContent>
     </Sheet>
   );
