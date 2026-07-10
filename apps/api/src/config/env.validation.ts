@@ -22,4 +22,5 @@ export const envValidationSchema = Joi.object({
   JWT_REFRESH_EXPIRES_IN: Joi.string().default('7d'),
 
   INTAKE_WEBHOOK_SECRET: Joi.string().required(),
+  PORTAL_CALLBACK_URL: Joi.string().uri().optional(),
 });

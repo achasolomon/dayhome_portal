@@ -1,34 +1,53 @@
 # Application Portal Integration
 
-**Last updated:** 2026-07-08  
-**Status:** Agreed (pending staging validation)
+**Last updated:** 2026-07-10  
+**Status:** Implemented — see below for exact payload schemas
 
 ---
+
+## Base URL
+
+```
+https://[our-domain]/api/v1
+```
+
+All endpoints below are relative to this base URL.
 
 ## Overview
 
 The external Application Portal submits pre-approved dayhomes to our system via an API intake webhook. Our system is the **source of truth** for dayhome data; the portal is the **entry point**. Once a dayhome is intaken, the portal pushes ongoing updates via callback endpoints.
 
-### Architecture Flow
+### Architecture Flow (Bi-Directional)
 
 ```
-Application Portal                    Our System
-─────────────────                    ──────────
+Portal → Our System (Inbound)
+──────────────────────────────
 
-  POST /api/v1/dayhomes/intake  ──►  HMAC verify signature
-  (new dayhome approved)              Idempotency check
-                                      Validate & map fields
-                                      Create DAYHOME_OWNER user
-                                      Create dayhome (ACTIVE)
-                                      Download documents
-                                      Send welcome email
-                                  ◄── 201 Created / 409 / 422
+  POST /dayhomes/intake           ──►   HMAC verify signature
+  (new dayhome approved)                 Idempotency check
+                                         Validate & map fields
+                                         Create DAYHOME_OWNER user
+                                         Create dayhome (ACTIVE)
+                                         Download documents
+                                         Store in R2/MinIO
+                                     ◄── 201 Created / 409 / 422
 
-  POST /api/v1/internal/status   ──►  Status transition
-  POST /api/v1/internal/compliance──► Compliance record
-  PUT /api/v1/internal/educator-profile──► Update operations
-  POST /api/v1/internal/documents ──► Document sync
-                                  ◄── 200 OK / 422
+  POST /internal/status           ──►   Status transition
+  POST /internal/compliance       ──►   Compliance record
+  PUT  /internal/educator-profile ──►   Update operations
+  POST /internal/documents        ──►   Document sync (expired/renewed)
+                                     ◄── 200 OK / 404 / 422
+
+
+Our System → Portal (Outbound)
+──────────────────────────────
+
+  Status change (internal)        ──►   POST /internal/status
+  Compliance recorded (internal)  ──►   POST /internal/compliance
+  Profile updated (internal)      ──►   PUT  /internal/educator-profile
+  Document change (internal)      ──►   POST /internal/documents
+  (e.g. admin panel actions)           Same HMAC signing, sent to
+                                     ◄── Portal's PORTAL_CALLBACK_URL
 ```
 
 ---
@@ -38,7 +57,8 @@ Application Portal                    Our System
 ### Endpoint
 
 ```
-POST https://[our-domain]/api/v1/dayhomes/intake
+POST /dayhomes/intake
+Full:  https://[our-domain]/api/v1/dayhomes/intake
 ```
 
 ### Authentication — HMAC Signature
@@ -209,7 +229,8 @@ Portal pushes ongoing updates to these HMAC-signed endpoints. All use the same s
 ### Status Update
 
 ```
-POST /api/v1/internal/status
+POST /internal/status
+Full: https://[our-domain]/api/v1/internal/status
 ```
 
 **Payload:**
@@ -217,53 +238,79 @@ POST /api/v1/internal/status
 ```json
 {
   "externalId": "SPC-250T5K-0001",
-  "newStatus": "suspended",
-  "reason": "...",
-  "effectiveDate": "2026-03-01T10:00:00Z"
+  "status": "suspended",
+  "reason": "License non-compliance — insurance lapsed",
+  "timestamp": "2026-07-09T14:30:00Z"
 }
 ```
 
-**Status mapping (portal → our internal):**
+| Field        | Type              | Required | Notes                                                            |
+| ------------ | ----------------- | -------- | ---------------------------------------------------------------- |
+| `externalId` | string            | yes      | Portal's dayhome ID                                              |
+| `status`     | string            | yes      | `active`, `suspended`, `terminated`, `compliance_inspection_due` |
+| `reason`     | string            | no       | Optional context for the change                                  |
+| `timestamp`  | string (ISO 8601) | yes      | When the change occurred in the portal                           |
 
-| Portal Value                      | Our Status | Description                  |
-| --------------------------------- | ---------- | ---------------------------- |
-| `active`                          | ACTIVE     | Dayhome activated/reinstated |
-| `suspended`                       | SUSPENDED  | License suspended            |
-| `terminated`                      | CLOSED     | Permanently closed           |
-| `compliance_inspection_due`       | ACTIVE     | Compliance overdue           |
-| `compliance_inspection_scheduled` | ACTIVE     | Inspection scheduled         |
-| `compliance_inspection_completed` | ACTIVE     | Inspection done              |
-| `remediation_required`            | ACTIVE     | Issues found, needs fixes    |
-| `under_review`                    | ACTIVE     | Under investigation          |
+**Status mapping (portal → our system):**
 
-Our internal status machine uses `ACTIVE`, `SUSPENDED`, and `CLOSED` only. The portal's granular statuses are stored alongside for compliance tracking and reporting. `SUSPENDED` and `CLOSED` block check-in operations.
+| Portal Value                | Our `STATUS` | Our `portalStatus`          |
+| --------------------------- | ------------ | --------------------------- |
+| `active`                    | `ACTIVE`     | `active`                    |
+| `suspended`                 | `SUSPENDED`  | `suspended`                 |
+| `terminated`                | `CLOSED`     | `terminated`                |
+| `compliance_inspection_due` | `ACTIVE`     | `compliance_inspection_due` |
 
-**Response:** `200 OK` on success, `422` on validation failure.
+Our internal state machine uses `ACTIVE`, `SUSPENDED`, and `CLOSED` only. The portal's granular status is stored in `portalStatus` for reporting. `SUSPENDED` and `CLOSED` block check-in operations.
+
+**Response:** `200 OK` on success, `404` if dayhome not found, `422` on validation failure.
 
 ### Compliance Update
 
 ```
-POST /api/v1/internal/compliance
+POST /internal/compliance
+Full: https://[our-domain]/api/v1/internal/compliance
 ```
 
+**Not for our domain use localhost:4000 for now we will update you once we are live**
 **Payload:**
 
 ```json
 {
   "externalId": "SPC-250T5K-0001",
-  "inspectionDate": "2026-06-20T09:00:00Z",
-  "result": "PASS",
-  "notes": "...",
-  "nextDueDate": "2026-12-20"
+  "result": "pass",
+  "score": 96.0,
+  "itemsPassed": 24,
+  "itemsFailed": 0,
+  "criticalFailures": 0,
+  "summary": "All requirements met. No violations found.",
+  "inspectorName": "Sarah Connor",
+  "conductedAt": "2026-07-09T10:00:00Z",
+  "nextComplianceDue": "2027-07-09"
 }
 ```
 
-**Response:** `200 OK` on success, `422` on validation failure.
+All fields `externalId`, `result`, `conductedAt`, `nextComplianceDue` are required. Score, counts, and notes are optional.
+
+| Field               | Type              | Required | Notes                           |
+| ------------------- | ----------------- | -------- | ------------------------------- |
+| `externalId`        | string            | yes      | Portal's dayhome ID             |
+| `result`            | string            | yes      | `pass`, `conditional`, `fail`   |
+| `score`             | number            | no       | 0–100                           |
+| `itemsPassed`       | integer           | no       |                                 |
+| `itemsFailed`       | integer           | no       |                                 |
+| `criticalFailures`  | integer           | no       |                                 |
+| `summary`           | string            | no       | Free-text inspection notes      |
+| `inspectorName`     | string            | no       |                                 |
+| `conductedAt`       | string (ISO 8601) | yes      | Inspection date/time            |
+| `nextComplianceDue` | string (date)     | yes      | Next scheduled compliance check |
+
+**Response:** `200 OK` on success, `404` if dayhome not found.
 
 ### Educator Profile Update
 
 ```
-PUT /api/v1/internal/educator-profile
+PUT /internal/educator-profile
+Full: https://[our-domain]/api/v1/internal/educator-profile
 ```
 
 **Payload:**
@@ -275,17 +322,42 @@ PUT /api/v1/internal/educator-profile
   "maximumCapacity": 8,
   "operatingHoursStart": "07:00:00",
   "operatingHoursEnd": "18:00:00",
-  "specializations": ["Special Needs"],
-  "professionalBio": "..."
+  "childcareLevel": "Level 2",
+  "languagesSpoken": "English, French",
+  "childcareEducation": "Early Childhood Education Diploma",
+  "specializations": ["Special Needs", "Infant Care"],
+  "profileItems": [
+    { "title": "Standard First Aid", "type": "certification", "expiryDate": "2028-01-15" }
+  ]
 }
 ```
 
-**Response:** `200 OK` on success, `422` on validation failure.
+All fields except `externalId` are optional. Only provided fields are updated (partial PATCH semantics).
+
+| Field                 | Type     | Required | Notes                               |
+| --------------------- | -------- | -------- | ----------------------------------- |
+| `externalId`          | string   | yes      | Portal's dayhome ID                 |
+| `firstName`           | string   | no       | Maps to dayhome `educatorFirstName` |
+| `lastName`            | string   | no       | Maps to dayhome `educatorLastName`  |
+| `email`               | string   | no       | Maps to dayhome `educatorEmail`     |
+| `phone`               | string   | no       | Maps to dayhome `educatorPhone`     |
+| `currentCapacity`     | integer  | no       | Currently enrolled children         |
+| `maximumCapacity`     | integer  | no       | Max licensed capacity (1–200)       |
+| `operatingHoursStart` | string   | no       | `HH:mm:ss`                          |
+| `operatingHoursEnd`   | string   | no       | `HH:mm:ss`                          |
+| `childcareLevel`      | string   | no       | e.g. `"Level 2"`                    |
+| `languagesSpoken`     | string   | no       | Comma-separated                     |
+| `childcareEducation`  | string   | no       |                                     |
+| `specializations`     | string[] | no       |                                     |
+| `profileItems`        | array    | no       | Certifications / training           |
+
+**Response:** `200 OK` on success, `404` if dayhome not found.
 
 ### Document Update
 
 ```
-POST /api/v1/internal/documents
+POST /internal/documents
+Full: https://[our-domain]/api/v1/internal/documents
 ```
 
 **Payload:**
@@ -295,21 +367,80 @@ POST /api/v1/internal/documents
   "externalId": "SPC-250T5K-0001",
   "documents": [
     {
-      "originalName": "first_aid.pdf",
-      "status": "expired",
-      "expiryDate": "2026-01-15",
-      "replacedBy": {
-        "name": "First Aid Renewal",
-        "fileName": "first_aid_2026.pdf",
-        "expiryDate": "2028-01-15",
-        "downloadUrl": "https://portal.example.com/files/..."
-      }
+      "name": "First Aid Certificate",
+      "fileName": "first_aid_2026.pdf",
+      "category": "first_aid",
+      "action": "expired"
+    },
+    {
+      "name": "Home Insurance",
+      "fileName": "home_insurance_2026.pdf",
+      "category": "home_insurance",
+      "action": "renewed",
+      "downloadUrl": "https://portal.example.com/api/v1/external/documents/99/download?expires=...",
+      "expiryDate": "2027-07-09"
     }
   ]
 }
 ```
 
-**Response:** `200 OK` on success, `422` on validation failure.
+| Field           | Type         | Required | Notes                                               |
+| --------------- | ------------ | -------- | --------------------------------------------------- |
+| `externalId`    | string       | yes      | Portal's dayhome ID                                 |
+| `documents`     | array        | yes      | List of document updates                            |
+| ├ `name`        | string       | yes      | Display name                                        |
+| ├ `fileName`    | string       | yes      | Original filename for matching                      |
+| ├ `category`    | string       | yes      | `home_insurance`, `first_aid`, `police_check`, etc. |
+| ├ `action`      | string       | yes      | `expired`, `renewed`, `replaced`, `updated`         |
+| ├ `downloadUrl` | string       | no       | **Required** for `renewed`/`replaced` actions       |
+| └ `expiryDate`  | string(date) | no       | New expiry date for `renewed`/`updated` actions     |
+
+**Actions:**
+
+- `expired` — marks matching document(s) as `EXPIRED`
+- `renewed` — supersedes previous active document, downloads new file from `downloadUrl`, creates fresh document record
+- `replaced` — same as `renewed` (supersedes old, downloads new)
+- `updated` — updates `expiryDate` on matching document (no file change)
+
+Documents are matched by dayhome + filename. Failed downloads are logged but never block the response.
+
+**Response:** `200 OK` on success, `404` if dayhome not found.
+
+---
+
+---
+
+## Outbound Callbacks (Our System → Portal)
+
+When state changes originate in our system (admin panel, automated processes, etc.), we push updates to the portal's callback endpoints.
+
+### Configuration
+
+The portal's base URL is configured via the `PORTAL_CALLBACK_URL` environment variable. For development:
+
+```env
+PORTAL_CALLBACK_URL=http://localhost:8080
+```
+
+All outbound requests use the same HMAC-SHA256 signing as inbound requests (same `INTAKE_WEBHOOK_SECRET`).
+
+### Triggered Events
+
+| Event                              | Target Endpoint                  | When                                      |
+| ---------------------------------- | -------------------------------- | ----------------------------------------- |
+| Dayhome intake processed           | `POST /internal/status`          | After successful intake (notifies active) |
+| Status change (admin)              | `POST /internal/status`          | Admin changes dayhome status internally   |
+| Compliance recorded (internal)     | `POST /internal/compliance`      | Compliance form submitted in our system   |
+| Educator profile update (internal) | `PUT /internal/educator-profile` | Admin edits educator fields               |
+| Document action (internal)         | `POST /internal/documents`       | Document upload/expiry in our system      |
+
+### Payloads
+
+The outbound payloads match the inbound callback schemas documented above (see [Status Update](#status-update), [Compliance Update](#compliance-update), etc.).
+
+### Fire-and-Forget
+
+Outbound callbacks are asynchronous and non-blocking. If the portal is unreachable or returns an error, we log the failure but **do not** roll back the local change. This prevents portal outages from blocking our internal operations.
 
 ---
 
@@ -357,11 +488,9 @@ Use `crypto.timingSafeEqual` to prevent timing attacks.
 
 ## Rate Limiting
 
-| Endpoint Group                        | Rate Limit           |
-| ------------------------------------- | -------------------- |
-| `POST /api/v1/dayhomes/intake`        | 30 req/min per IP    |
-| `POST /api/v1/internal/*` (callbacks) | 60 req/min per IP    |
-| All other dayhome endpoints           | 100 req/min per user |
+| Endpoint Group | Rate Limit          |
+| -------------- | ------------------- |
+| All endpoints  | 20 req/min globally |
 
 ---
 
@@ -423,7 +552,7 @@ Defined in `packages/shared-types/src/constants.ts`:
 
 ### Portal Callback Validation
 
-- [ ] `POST /api/v1/internal/status` — status transitions
-- [ ] `POST /api/v1/internal/compliance` — compliance record
-- [ ] `PUT /api/v1/internal/educator-profile` — operations update
-- [ ] `POST /api/v1/internal/documents` — document sync
+- [ ] `POST /internal/status` — status transitions
+- [ ] `POST /internal/compliance` — compliance record
+- [ ] `PUT /internal/educator-profile` — operations update
+- [ ] `POST /internal/documents` — document sync

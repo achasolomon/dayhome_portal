@@ -38,7 +38,7 @@
 - **DTOs**: `class-validator` on backend; Zod on frontend
 - **i18n**: Every user-visible string uses `useTranslation()` + `t('key')`
 - **Soft delete**: `paranoid: true` on entities
-- **Rate limiting**: Intake webhook 30 req/min per IP; callback endpoints 60 req/min per IP; other endpoints 100 req/min per user
+- **Rate limiting**: 20 req/min globally (all endpoints share global throttle)
 - **Transactional emails**: Queued via BullMQ
 - **Swagger**: All new endpoints documented
 - **Migrations**: Every schema change has a migration
@@ -251,7 +251,7 @@ modules/dayhome/
 | Capacity display   | Always shown as `enrolled / capacity` with visual bar (green < 80%, yellow 80–95%, red >= 95%)                     |
 | Event-driven       | Audit logs and notifications triggered via events, not inline in service methods                                   |
 | Soft delete        | Dayhome `deletedAt` cascade soft-deletes related rooms, educators, enrollments                                     |
-| Rate limiting      | Intake 30 req/min per IP; callbacks 60 req/min per IP; general 100 req/min per user                                |
+| Rate limiting      | 20 req/min globally (all endpoints share global throttle)                                                          |
 | Document storage   | Files fetched from signed URLs within 24h; stored in R2/MinIO via StorageService                                   |
 | Source of truth    | Our system stores authoritative dayhome data; raw payload preserved for audit                                      |
 

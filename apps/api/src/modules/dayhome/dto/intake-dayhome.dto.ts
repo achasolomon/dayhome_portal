@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
   Max,
   MaxLength,
   Min,
@@ -87,6 +88,7 @@ class DayhomeDetailsDto {
 
   @ApiProperty({ example: true })
   @IsOptional()
+  @Type(() => Boolean)
   @IsBoolean()
   fencedBackyard?: boolean;
 
@@ -96,26 +98,31 @@ class DayhomeDetailsDto {
   smokingStatus!: string;
 
   @ApiProperty({ example: false })
+  @Type(() => Boolean)
   @IsBoolean()
   hasPets!: boolean;
 
   @ApiProperty({ example: 4 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   homeResidentsCount?: number;
 
   @ApiProperty({ example: false })
+  @Type(() => Boolean)
   @IsBoolean()
   eveningOvernightCare!: boolean;
 }
 
 class OperationsDto {
   @ApiProperty({ example: 2 })
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   currentCapacity!: number;
 
   @ApiProperty({ example: 8 })
+  @Type(() => Number)
   @IsNumber()
   @Min(1)
   @Max(200)
@@ -123,10 +130,12 @@ class OperationsDto {
 
   @ApiProperty({ example: '07:00:00' })
   @IsString()
+  @Matches(/^\d{2}:\d{2}:\d{2}$/)
   operatingHoursStart!: string;
 
   @ApiProperty({ example: '17:30:00' })
   @IsString()
+  @Matches(/^\d{2}:\d{2}:\d{2}$/)
   operatingHoursEnd!: string;
 
   @ApiProperty({ example: 'Level 2', required: false })
@@ -204,21 +213,25 @@ class FinalInspectionDto {
 
   @ApiProperty({ example: 96.0, required: false })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   score?: number;
 
   @ApiProperty({ example: 24, required: false })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   itemsPassed?: number;
 
   @ApiProperty({ example: 0, required: false })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   itemsFailed?: number;
 
   @ApiProperty({ example: 0, required: false })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   criticalFailures?: number;
 

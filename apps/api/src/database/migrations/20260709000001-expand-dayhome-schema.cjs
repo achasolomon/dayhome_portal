@@ -4,6 +4,9 @@ module.exports = {
   up: async (queryInterface) => {
     // Change status enum — remove PENDING, REJECTED; keep ACTIVE, SUSPENDED, CLOSED
     await queryInterface.sequelize.query(
+      `DROP TYPE IF EXISTS "enum_dayhomes_status_old";`,
+    );
+    await queryInterface.sequelize.query(
       `ALTER TYPE "enum_dayhomes_status" RENAME TO "enum_dayhomes_status_old";`,
     );
     await queryInterface.sequelize.query(
@@ -266,6 +269,9 @@ module.exports = {
     }
 
     // Restore old status enum
+    await queryInterface.sequelize.query(
+      `DROP TYPE IF EXISTS "enum_dayhomes_status_new";`,
+    );
     await queryInterface.sequelize.query(
       `ALTER TYPE "enum_dayhomes_status" RENAME TO "enum_dayhomes_status_new";`,
     );

@@ -11,6 +11,7 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
 import { getQueueToken } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { register } from 'prom-client';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -35,7 +36,7 @@ async function bootstrap() {
     serverAdapter.getRouter() as RequestHandler,
   );
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', { exclude: ['/metrics'] });
 
   app.enableVersioning({
     type: VersioningType.URI,
@@ -83,6 +84,21 @@ async function bootstrap() {
   SwaggerModule.setup('api/v1/docs', app, document);
 
   const port = process.env.PORT || 4000;
+
+  // Raw Express route for Prometheus scraper (bypasses NestJS prefix/versioning)
+  const expressApp = app
+    .getHttpAdapter()
+    .getInstance() as import('express').Express;
+  expressApp.get(
+    '/metrics',
+    async (
+      _req: import('express').Request,
+      res: import('express').Response,
+    ) => {
+      res.setHeader('Content-Type', register.contentType);
+      res.end(await register.metrics());
+    },
+  );
 
   await app.listen(port);
 

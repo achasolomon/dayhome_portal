@@ -58,22 +58,22 @@ A unified childcare management platform that takes over the **moment a dayhome i
 
 ### Tech Stack
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| **Monorepo** | pnpm workspaces + Turborepo | Shared configs, types, utils across all packages |
-| **Backend** | NestJS 10 + TypeScript | REST API with modular architecture |
-| **Database** | PostgreSQL 15 + Sequelize (with `sequelize-typescript`) | Primary data store |
-| **Cache / Queue** | Redis 7 + BullMQ | Caching, rate limiting, job queues |
-| **Web Frontends** | Next.js 14 App Router + React 18 | 3 portals (admin, dayhome owner, parent) |
-| **Mobile** | React Native / Expo SDK 51 | Educator + Parent mobile apps (Sprint 10) |
-| **UI** | Tailwind CSS + shadcn/ui + Radix primitives | Design system shared across portals |
-| **State** | TanStack Query + Zustand | Server state + client state |
-| **Forms** | React Hook Form + Zod | Frontend validation |
-| **Charts** | Recharts | Reporting dashboards |
-| **File Storage** | MinIO (dev) / Cloudflare R2 (prod) | S3-compatible document storage |
-| **Monitoring** | Prometheus + Grafana | Metrics and visualization |
-| **Error Tracking** | Sentry | Production error monitoring |
-| **Email** | Mailpit (dev) / Resend or SendGrid (prod) | Transactional emails |
+| Layer              | Technology                                              | Purpose                                          |
+| ------------------ | ------------------------------------------------------- | ------------------------------------------------ |
+| **Monorepo**       | pnpm workspaces + Turborepo                             | Shared configs, types, utils across all packages |
+| **Backend**        | NestJS 10 + TypeScript                                  | REST API with modular architecture               |
+| **Database**       | PostgreSQL 15 + Sequelize (with `sequelize-typescript`) | Primary data store                               |
+| **Cache / Queue**  | Redis 7 + BullMQ                                        | Caching, rate limiting, job queues               |
+| **Web Frontends**  | Next.js 14 App Router + React 18                        | 3 portals (admin, dayhome owner, parent)         |
+| **Mobile**         | React Native / Expo SDK 51                              | Educator + Parent mobile apps (Sprint 10)        |
+| **UI**             | Tailwind CSS + shadcn/ui + Radix primitives             | Design system shared across portals              |
+| **State**          | TanStack Query + Zustand                                | Server state + client state                      |
+| **Forms**          | React Hook Form + Zod                                   | Frontend validation                              |
+| **Charts**         | Recharts                                                | Reporting dashboards                             |
+| **File Storage**   | MinIO (dev) / Cloudflare R2 (prod)                      | S3-compatible document storage                   |
+| **Monitoring**     | Prometheus + Grafana                                    | Metrics and visualization                        |
+| **Error Tracking** | Sentry                                                  | Production error monitoring                      |
+| **Email**          | Mailpit (dev) / Resend or SendGrid (prod)               | Transactional emails                             |
 
 ### Monorepo Structure
 
@@ -227,40 +227,41 @@ Idempotency-Key: <externalId-or-uuid>
 
 **Payload fields (expected from external portal):**
 
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| `externalId` | string | yes | ID from the Application Portal (also used as idempotency key) |
-| `businessName` | string | yes | Legal name of dayhome business |
-| `ownerName` | string | yes | Primary owner full name |
-| `ownerEmail` | string | yes | Owner's email (used for account invitation) |
-| `ownerPhone` | string | no | |
-| `address` | string | yes | Physical address |
-| `approvedCapacity` | number | yes | Max children approved by agency |
-| `licenseNumber` | string | yes | Agency-issued license number |
-| `licenseExpiryDate` | date | yes | License expiration |
-| `insuranceProvider` | string | no | |
-| `insuranceExpiryDate` | date | no | |
-| `inspectionDate` | date | no | Most recent inspection date |
-| `inspectionResult` | enum | no | PASS / PASS_WITH_CONDITIONS / FAIL |
+| Field                 | Type   | Required | Notes                                                         |
+| --------------------- | ------ | -------- | ------------------------------------------------------------- |
+| `externalId`          | string | yes      | ID from the Application Portal (also used as idempotency key) |
+| `businessName`        | string | yes      | Legal name of dayhome business                                |
+| `ownerName`           | string | yes      | Primary owner full name                                       |
+| `ownerEmail`          | string | yes      | Owner's email (used for account invitation)                   |
+| `ownerPhone`          | string | no       |                                                               |
+| `address`             | string | yes      | Physical address                                              |
+| `approvedCapacity`    | number | yes      | Max children approved by agency                               |
+| `licenseNumber`       | string | yes      | Agency-issued license number                                  |
+| `licenseExpiryDate`   | date   | yes      | License expiration                                            |
+| `insuranceProvider`   | string | no       |                                                               |
+| `insuranceExpiryDate` | date   | no       |                                                               |
+| `inspectionDate`      | date   | no       | Most recent inspection date                                   |
+| `inspectionResult`    | enum   | no       | PASS / PASS_WITH_CONDITIONS / FAIL                            |
 
 The Unified System validates signature → checks idempotency → maps fields → creates the dayhome with status `ACTIVE` (not `PENDING` — it arrives pre-approved). If validation fails, the record is flagged for manual review by an agency coordinator.
 
 **Error responses:**
-| Status | Code | Meaning |
-|---|---|---|
-| 401 | `INTAKE_SIGNATURE_INVALID` | HMAC signature doesn't match |
-| 409 | `INTAKE_DUPLICATE` | Idempotency key already processed (returns existing record) |
-| 422 | `INTAKE_VALIDATION_FAILED` | Payload fields invalid (flagged for manual review) |
+
+| Status | Code                       | Meaning                                                     |
+| ------ | -------------------------- | ----------------------------------------------------------- |
+| 401    | `INTAKE_SIGNATURE_INVALID` | HMAC signature doesn't match                                |
+| 409    | `INTAKE_DUPLICATE`         | Idempotency key already processed (returns existing record) |
+| 422    | `INTAKE_VALIDATION_FAILED` | Payload fields invalid (flagged for manual review)          |
 
 ### Other External Integrations
 
-| Integration | Direction | Purpose |
-|---|---|---|
-| Cloudflare R2 (S3) | Outbound | File storage for documents, photos |
-| Stripe | Outbound | Payment processing (Sprint 6) — decision required: mock-only or real Stripe integration. See [Payment Architecture Decision](#payment-architecture-decision) below |
-| SendGrid / Resend | Outbound | Transactional email |
-| Twilio | Outbound | SMS notifications (Sprint 8) |
-| Firebase Cloud Messaging | Outbound | Push notifications (Sprint 10) |
+| Integration              | Direction | Purpose                                                                                                                                                            |
+| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Cloudflare R2 (S3)       | Outbound  | File storage for documents, photos                                                                                                                                 |
+| Stripe                   | Outbound  | Payment processing (Sprint 6) — decision required: mock-only or real Stripe integration. See [Payment Architecture Decision](#payment-architecture-decision) below |
+| SendGrid / Resend        | Outbound  | Transactional email                                                                                                                                                |
+| Twilio                   | Outbound  | SMS notifications (Sprint 8)                                                                                                                                       |
+| Firebase Cloud Messaging | Outbound  | Push notifications (Sprint 10)                                                                                                                                     |
 
 ---
 
@@ -289,38 +290,38 @@ Dayhome ──has many──▶ Announcement
 
 ### Entity Reference
 
-| Entity | Table | Key Fields | Sprint |
-|---|---|---|---|
-| **Organization** | `organizations` | id, name, email, status (ACTIVE/SUSPENDED) | S1 |
-| **User** | `users` | id, organizationId, email, role, firstName, lastName, status | S0 |
-| **Dayhome** | `dayhomes` | id, organizationId, name, address, capacity, status (ACTIVE/SUSPENDED/CLOSED), licenseNumber, licenseExpiry, externalId | S2 |
-| **Room** | `rooms` | id, dayhomeId, name, capacity, ageGroup (INFANT/TODDLER/PRESCHOOL/SCHOOL_AGE) | S2 |
-| **Educator** | `educators` | id, dayhomeId, firstName, lastName, email, phone, status (ACTIVE/ON_LEAVE/TERMINATED) | S3 |
-| **ShiftPattern** | `shift_patterns` | id, educatorId, dayOfWeek, startTime, endTime, roomId, effectiveFrom, effectiveTo | S3 |
-| **PtoRequest** | `pto_requests` | id, educatorId, startDate, endDate, reason, status (PENDING/APPROVED/REJECTED) | S3 |
-| **TimeClockEntry** | `time_clock_entries` | id, educatorId, clockIn, clockOut, type (WORK/BREAK) | S3 |
-| **Family** | `families` | id, organizationId, primaryContactName, email, phone | S4 |
-| **Child** | `children` | id, familyId, firstName, lastName, dateOfBirth, gender, allergies, medicalNotes, dietaryRestrictions | S4 |
-| **AuthorizedPickup** | `authorized_pickups` | id, childId, name, phone, relationship, photoUrl, pinHash | S4 |
-| **EmergencyContact** | `emergency_contacts` | id, childId, name, phone, relationship | S4 |
-| **Enrollment** | `enrollments` | id, childId, dayhomeId, roomId, startDate, endDate, status (ACTIVE/WAITLISTED/WITHDRAWN) | S4 |
-| **Attendance** | `attendance_records` | id, childId, date, checkInTime, checkOutTime, checkedInBy, checkedOutBy, status (PRESENT/ABSENT/LATE), healthScreeningPassed | S5 |
-| **DailyBoard** | `daily_boards` | id, dayhomeId, roomId, date, snapshot data | S5 |
-| **Invoice** | `invoices` | id, familyId, dayhomeId, totalAmount, subsidyAmount, paidAmount, dueDate, status (DRAFT/SENT/PAID/OVERDUE/CANCELLED) | S6 |
-| **InvoiceLineItem** | `invoice_line_items` | id, invoiceId, childId, date, description, amount | S6 |
-| **Subsidy** | `subsidies` | id, familyId, dayhomeId, type (PERCENTAGE/FIXED), value, effectiveFrom, effectiveTo | S6 |
-| **Payment** | `payments` | id, invoiceId, amount, method, reference, paidAt | S6 |
-| **Document** | `documents` | id, dayhomeId, educatorId, documentType, fileUrl, expiryDate, status (ACTIVE/EXPIRING_SOON/EXPIRED/SUPERSEDED), version | S7 |
-| **Message** | `messages` | id, threadId, senderEducatorId, senderFamilyId, body, isRead | S8 |
-| **MessageThread** | `message_threads` | id, dayhomeId, subject, participantIds | S8 |
-| **Announcement** | `announcements` | id, dayhomeId, title, body, priority (INFO/IMPORTANT/URGENT) | S8 |
-| **ActivityLog** | `activity_logs` | id, childId, educatorId, type (MEAL/NAP/DIAPER/MOOD/PHOTO/NOTE), description, timestamp, photoUrls | S8 |
-| **IncidentReport** | `incident_reports` | id, childId, reporterId, type, severity, description, actionTaken, parentAcknowledged | S8 |
-| **NotificationPreference** | `notification_preferences` | id, userId, channel (PUSH/EMAIL/SMS), type, enabled | S8 |
-| **AuditLog** | `audit_logs` | id, userId, action, entity, entityId, before, after, timestamp | Cross |
-| **CurriculumPlan** | `curriculum_plans` | id, dayhomeId, roomId, title, learningDomain, startDate, endDate, activities | S10 (deferred) |
-| **DevelopmentalAssessment** | `developmental_assessments` | id, childId, domain, score, notes, assessedAt | S10 (deferred) |
-| **MealPlan** | `meal_plans` | id, dayhomeId, weekStarting, dailyMenus | S10 (deferred) |
+| Entity                      | Table                       | Key Fields                                                                                                                   | Sprint         |
+| --------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| **Organization**            | `organizations`             | id, name, email, status (ACTIVE/SUSPENDED)                                                                                   | S1             |
+| **User**                    | `users`                     | id, organizationId, email, role, firstName, lastName, status                                                                 | S0             |
+| **Dayhome**                 | `dayhomes`                  | id, organizationId, name, address, capacity, status (ACTIVE/SUSPENDED/CLOSED), licenseNumber, licenseExpiry, externalId      | S2             |
+| **Room**                    | `rooms`                     | id, dayhomeId, name, capacity, ageGroup (INFANT/TODDLER/PRESCHOOL/SCHOOL_AGE)                                                | S2             |
+| **Educator**                | `educators`                 | id, dayhomeId, firstName, lastName, email, phone, status (ACTIVE/ON_LEAVE/TERMINATED)                                        | S3             |
+| **ShiftPattern**            | `shift_patterns`            | id, educatorId, dayOfWeek, startTime, endTime, roomId, effectiveFrom, effectiveTo                                            | S3             |
+| **PtoRequest**              | `pto_requests`              | id, educatorId, startDate, endDate, reason, status (PENDING/APPROVED/REJECTED)                                               | S3             |
+| **TimeClockEntry**          | `time_clock_entries`        | id, educatorId, clockIn, clockOut, type (WORK/BREAK)                                                                         | S3             |
+| **Family**                  | `families`                  | id, organizationId, primaryContactName, email, phone                                                                         | S4             |
+| **Child**                   | `children`                  | id, familyId, firstName, lastName, dateOfBirth, gender, allergies, medicalNotes, dietaryRestrictions                         | S4             |
+| **AuthorizedPickup**        | `authorized_pickups`        | id, childId, name, phone, relationship, photoUrl, pinHash                                                                    | S4             |
+| **EmergencyContact**        | `emergency_contacts`        | id, childId, name, phone, relationship                                                                                       | S4             |
+| **Enrollment**              | `enrollments`               | id, childId, dayhomeId, roomId, startDate, endDate, status (ACTIVE/WAITLISTED/WITHDRAWN)                                     | S4             |
+| **Attendance**              | `attendance_records`        | id, childId, date, checkInTime, checkOutTime, checkedInBy, checkedOutBy, status (PRESENT/ABSENT/LATE), healthScreeningPassed | S5             |
+| **DailyBoard**              | `daily_boards`              | id, dayhomeId, roomId, date, snapshot data                                                                                   | S5             |
+| **Invoice**                 | `invoices`                  | id, familyId, dayhomeId, totalAmount, subsidyAmount, paidAmount, dueDate, status (DRAFT/SENT/PAID/OVERDUE/CANCELLED)         | S6             |
+| **InvoiceLineItem**         | `invoice_line_items`        | id, invoiceId, childId, date, description, amount                                                                            | S6             |
+| **Subsidy**                 | `subsidies`                 | id, familyId, dayhomeId, type (PERCENTAGE/FIXED), value, effectiveFrom, effectiveTo                                          | S6             |
+| **Payment**                 | `payments`                  | id, invoiceId, amount, method, reference, paidAt                                                                             | S6             |
+| **Document**                | `documents`                 | id, dayhomeId, educatorId, documentType, fileUrl, expiryDate, status (ACTIVE/EXPIRING_SOON/EXPIRED/SUPERSEDED), version      | S7             |
+| **Message**                 | `messages`                  | id, threadId, senderEducatorId, senderFamilyId, body, isRead                                                                 | S8             |
+| **MessageThread**           | `message_threads`           | id, dayhomeId, subject, participantIds                                                                                       | S8             |
+| **Announcement**            | `announcements`             | id, dayhomeId, title, body, priority (INFO/IMPORTANT/URGENT)                                                                 | S8             |
+| **ActivityLog**             | `activity_logs`             | id, childId, educatorId, type (MEAL/NAP/DIAPER/MOOD/PHOTO/NOTE), description, timestamp, photoUrls                           | S8             |
+| **IncidentReport**          | `incident_reports`          | id, childId, reporterId, type, severity, description, actionTaken, parentAcknowledged                                        | S8             |
+| **NotificationPreference**  | `notification_preferences`  | id, userId, channel (PUSH/EMAIL/SMS), type, enabled                                                                          | S8             |
+| **AuditLog**                | `audit_logs`                | id, userId, action, entity, entityId, before, after, timestamp                                                               | Cross          |
+| **CurriculumPlan**          | `curriculum_plans`          | id, dayhomeId, roomId, title, learningDomain, startDate, endDate, activities                                                 | S10 (deferred) |
+| **DevelopmentalAssessment** | `developmental_assessments` | id, childId, domain, score, notes, assessedAt                                                                                | S10 (deferred) |
+| **MealPlan**                | `meal_plans`                | id, dayhomeId, weekStarting, dailyMenus                                                                                      | S10 (deferred) |
 
 ---
 
@@ -347,20 +348,20 @@ ORG_ADMIN             — Manage org settings, all dayhomes, staff, billing, rep
 
 ### Permissions Matrix
 
-| Domain | SUPER_ADMIN | ORG_ADMIN | ORG_MANAGER | DAYHOME_OWNER | EDUCATOR | BILLING_ONLY | PARENT | GOVERNMENT |
-|---|---|---|---|---|---|---|---|---|
-| Organizations | CRUD | Read | Read | — | — | — | — | — |
-| Dayhomes | All | All org | All org | Own | Assigned | — | — | List |
-| Rooms | — | — | — | Own CRUD | Read | — | — | — |
-| Educators | — | All org | All org | Own CRUD | Read own | — | — | — |
-| Families | — | All org | All org | Own enrolled | — | — | Own | — |
-| Children | — | All org | All org | Own enrolled | Assigned | — | Own | Aggregated |
-| Attendance | — | All | All | Own | Assigned | — | Own children | Aggregated |
-| Billing/Invoices | All | All org | — | Own | — | All org | Own | — |
-| Documents | All | All org | All org | Own | Own certs | — | — | Read-only |
-| Messages | — | — | — | Own | Own threads | — | Own threads | — |
-| Reports | All | All org | Limited | Own | — | Finance only | — | Compliance |
-| Audit Logs | All | All org | All org | Own | — | — | — | — |
+| Domain           | SUPER_ADMIN | ORG_ADMIN | ORG_MANAGER | DAYHOME_OWNER | EDUCATOR    | BILLING_ONLY | PARENT       | GOVERNMENT |
+| ---------------- | ----------- | --------- | ----------- | ------------- | ----------- | ------------ | ------------ | ---------- |
+| Organizations    | CRUD        | Read      | Read        | —             | —           | —            | —            | —          |
+| Dayhomes         | All         | All org   | All org     | Own           | Assigned    | —            | —            | List       |
+| Rooms            | —           | —         | —           | Own CRUD      | Read        | —            | —            | —          |
+| Educators        | —           | All org   | All org     | Own CRUD      | Read own    | —            | —            | —          |
+| Families         | —           | All org   | All org     | Own enrolled  | —           | —            | Own          | —          |
+| Children         | —           | All org   | All org     | Own enrolled  | Assigned    | —            | Own          | Aggregated |
+| Attendance       | —           | All       | All         | Own           | Assigned    | —            | Own children | Aggregated |
+| Billing/Invoices | All         | All org   | —           | Own           | —           | All org      | Own          | —          |
+| Documents        | All         | All org   | All org     | Own           | Own certs   | —            | —            | Read-only  |
+| Messages         | —           | —         | —           | Own           | Own threads | —            | Own threads  | —          |
+| Reports          | All         | All org   | Limited     | Own           | —           | Finance only | —            | Compliance |
+| Audit Logs       | All         | All org   | All org     | Own           | —           | —            | —            | —          |
 
 ---
 
@@ -375,6 +376,7 @@ ORG_ADMIN             — Manage org settings, all dayhomes, staff, billing, rep
 ### Standard Response Envelope
 
 **Success:**
+
 ```json
 {
   "success": true,
@@ -387,6 +389,7 @@ ORG_ADMIN             — Manage org settings, all dayhomes, staff, billing, rep
 ```
 
 **Error:**
+
 ```json
 {
   "success": false,
@@ -404,6 +407,7 @@ ORG_ADMIN             — Manage org settings, all dayhomes, staff, billing, rep
 ```
 
 **Paginated:**
+
 ```json
 {
   "success": true,
@@ -422,83 +426,83 @@ ORG_ADMIN             — Manage org settings, all dayhomes, staff, billing, rep
 
 ### API Route Map
 
-| Module | Method | Route | Auth | Roles |
-|---|---|---|---|---|
-| **Auth** | POST | `/auth/login` | Public | — |
-| | POST | `/auth/register` | Public | — |
-| | POST | `/auth/logout` | JWT | All |
-| | POST | `/auth/refresh` | Cookie | — |
-| | POST | `/auth/forgot-password` | Public | — |
-| | POST | `/auth/reset-password` | Public | — |
-| | GET | `/auth/me` | JWT | All |
-| **Dayhome** | POST | `/dayhomes/intake` | API Key | External Portal |
-| | GET | `/dayhomes` | JWT | ORG_ADMIN+ |
-| | GET | `/dayhomes/:id` | JWT | ORG_ADMIN+, OWNER |
-| | PATCH | `/dayhomes/:id` | JWT | ORG_ADMIN, OWNER |
-| | POST | `/dayhomes/:id/suspend` | JWT | ORG_ADMIN, OWNER |
-| | POST | `/dayhomes/:id/activate` | JWT | ORG_ADMIN |
-| | POST | `/dayhomes/:id/close` | JWT | ORG_ADMIN |
-| **Rooms** | GET | `/dayhomes/:id/rooms` | JWT | OWNER+ |
-| | POST | `/dayhomes/:id/rooms` | JWT | OWNER |
-| | PATCH | `/rooms/:id` | JWT | OWNER |
-| | DELETE | `/rooms/:id` | JWT | OWNER |
-| **Educator** | GET | `/educators` | JWT | OWNER+ |
-| | POST | `/educators` | JWT | OWNER |
-| | GET | `/educators/:id` | JWT | OWNER, SELF |
-| | PATCH | `/educators/:id` | JWT | OWNER |
-| | GET | `/educators/:id/schedule` | JWT | OWNER, SELF |
-| | POST | `/educators/:id/time-clock/clock-in` | JWT | EDUCATOR |
-| | POST | `/educators/:id/time-clock/clock-out` | JWT | EDUCATOR |
-| | POST | `/educators/:id/pto` | JWT | EDUCATOR |
-| | PATCH | `/pto/:id/approve` | JWT | OWNER |
-| **Family** | POST | `/families` | Public | — |
-| | GET | `/families/:id` | JWT | PARENT, ORG_ADMIN+ |
-| | PATCH | `/families/:id` | JWT | PARENT |
-| **Child** | POST | `/children` | JWT | PARENT |
-| | GET | `/children/:id` | JWT | PARENT, EDUCATOR, ADMIN |
-| | PATCH | `/children/:id` | JWT | PARENT |
-| | POST | `/children/:id/pickups` | JWT | PARENT |
-| | POST | `/children/:id/enroll` | JWT | ORG_ADMIN |
-| **Attendance** | POST | `/attendance/check-in` | JWT | EDUCATOR |
-| | POST | `/attendance/check-out` | JWT | EDUCATOR |
-| | GET | `/attendance` | JWT | OWNER+ |
-| | GET | `/attendance/daily-board/:dayhomeId` | JWT | EDUCATOR, OWNER |
-| **Billing** | POST | `/invoices/generate` | JWT | OWNER, ORG_ADMIN |
-| | GET | `/invoices` | JWT | OWNER, PARENT, ORG_ADMIN |
-| | GET | `/invoices/:id` | JWT | OWNER, PARENT |
-| | POST | `/payments` | JWT | PARENT |
-| | GET | `/subsidies` | JWT | ORG_ADMIN, BILLING_ONLY |
-| | POST | `/subsidies` | JWT | ORG_ADMIN |
-| **Documents** | POST | `/documents/upload` | JWT | OWNER, EDUCATOR |
-| | GET | `/documents` | JWT | ORG_ADMIN+ |
-| | GET | `/documents/:id` | JWT | ORG_ADMIN+, OWNER |
-| | POST | `/documents/:id/renew` | JWT | OWNER |
-| **Messaging** | POST | `/messages` | JWT | PARENT, EDUCATOR |
-| | GET | `/messages/threads` | JWT | All |
-| | GET | `/messages/threads/:id` | JWT | Participant |
-| | POST | `/announcements` | JWT | OWNER, ORG_ADMIN |
-| **Activities** | POST | `/activities` | JWT | EDUCATOR |
-| | GET | `/activities/child/:id` | JWT | PARENT, EDUCATOR |
-| **Incidents** | POST | `/incidents` | JWT | EDUCATOR |
-| | GET | `/incidents/:id` | JWT | PARENT, OWNER |
-| | POST | `/incidents/:id/acknowledge` | JWT | PARENT |
-| **Reports** | GET | `/reports/attendance` | JWT | ORG_ADMIN+ |
-| | GET | `/reports/financial` | JWT | ORG_ADMIN, BILLING_ONLY |
-| | GET | `/reports/compliance` | JWT | ORG_ADMIN+, GOVERNMENT |
-| | GET | `/reports/enrollment` | JWT | ORG_ADMIN+, GOVERNMENT |
-| | GET | `/dashboard` | JWT | ORG_ADMIN+ |
-| **Health** | GET | `/health` | Public | — |
-| **Storage** | POST | `/storage/upload` | JWT | All authed |
-| **Notifications** | POST | `/notifications/register-device` | JWT | All |
-| | GET | `/notifications/preferences` | JWT | All |
-| | PATCH | `/notifications/preferences` | JWT | All |
+| Module            | Method | Route                                 | Auth    | Roles                    |
+| ----------------- | ------ | ------------------------------------- | ------- | ------------------------ |
+| **Auth**          | POST   | `/auth/login`                         | Public  | —                        |
+|                   | POST   | `/auth/register`                      | Public  | —                        |
+|                   | POST   | `/auth/logout`                        | JWT     | All                      |
+|                   | POST   | `/auth/refresh`                       | Cookie  | —                        |
+|                   | POST   | `/auth/forgot-password`               | Public  | —                        |
+|                   | POST   | `/auth/reset-password`                | Public  | —                        |
+|                   | GET    | `/auth/me`                            | JWT     | All                      |
+| **Dayhome**       | POST   | `/dayhomes/intake`                    | API Key | External Portal          |
+|                   | GET    | `/dayhomes`                           | JWT     | ORG_ADMIN+               |
+|                   | GET    | `/dayhomes/:id`                       | JWT     | ORG_ADMIN+, OWNER        |
+|                   | PATCH  | `/dayhomes/:id`                       | JWT     | ORG_ADMIN, OWNER         |
+|                   | POST   | `/dayhomes/:id/suspend`               | JWT     | ORG_ADMIN, OWNER         |
+|                   | POST   | `/dayhomes/:id/activate`              | JWT     | ORG_ADMIN                |
+|                   | POST   | `/dayhomes/:id/close`                 | JWT     | ORG_ADMIN                |
+| **Rooms**         | GET    | `/dayhomes/:id/rooms`                 | JWT     | OWNER+                   |
+|                   | POST   | `/dayhomes/:id/rooms`                 | JWT     | OWNER                    |
+|                   | PATCH  | `/rooms/:id`                          | JWT     | OWNER                    |
+|                   | DELETE | `/rooms/:id`                          | JWT     | OWNER                    |
+| **Educator**      | GET    | `/educators`                          | JWT     | OWNER+                   |
+|                   | POST   | `/educators`                          | JWT     | OWNER                    |
+|                   | GET    | `/educators/:id`                      | JWT     | OWNER, SELF              |
+|                   | PATCH  | `/educators/:id`                      | JWT     | OWNER                    |
+|                   | GET    | `/educators/:id/schedule`             | JWT     | OWNER, SELF              |
+|                   | POST   | `/educators/:id/time-clock/clock-in`  | JWT     | EDUCATOR                 |
+|                   | POST   | `/educators/:id/time-clock/clock-out` | JWT     | EDUCATOR                 |
+|                   | POST   | `/educators/:id/pto`                  | JWT     | EDUCATOR                 |
+|                   | PATCH  | `/pto/:id/approve`                    | JWT     | OWNER                    |
+| **Family**        | POST   | `/families`                           | Public  | —                        |
+|                   | GET    | `/families/:id`                       | JWT     | PARENT, ORG_ADMIN+       |
+|                   | PATCH  | `/families/:id`                       | JWT     | PARENT                   |
+| **Child**         | POST   | `/children`                           | JWT     | PARENT                   |
+|                   | GET    | `/children/:id`                       | JWT     | PARENT, EDUCATOR, ADMIN  |
+|                   | PATCH  | `/children/:id`                       | JWT     | PARENT                   |
+|                   | POST   | `/children/:id/pickups`               | JWT     | PARENT                   |
+|                   | POST   | `/children/:id/enroll`                | JWT     | ORG_ADMIN                |
+| **Attendance**    | POST   | `/attendance/check-in`                | JWT     | EDUCATOR                 |
+|                   | POST   | `/attendance/check-out`               | JWT     | EDUCATOR                 |
+|                   | GET    | `/attendance`                         | JWT     | OWNER+                   |
+|                   | GET    | `/attendance/daily-board/:dayhomeId`  | JWT     | EDUCATOR, OWNER          |
+| **Billing**       | POST   | `/invoices/generate`                  | JWT     | OWNER, ORG_ADMIN         |
+|                   | GET    | `/invoices`                           | JWT     | OWNER, PARENT, ORG_ADMIN |
+|                   | GET    | `/invoices/:id`                       | JWT     | OWNER, PARENT            |
+|                   | POST   | `/payments`                           | JWT     | PARENT                   |
+|                   | GET    | `/subsidies`                          | JWT     | ORG_ADMIN, BILLING_ONLY  |
+|                   | POST   | `/subsidies`                          | JWT     | ORG_ADMIN                |
+| **Documents**     | POST   | `/documents/upload`                   | JWT     | OWNER, EDUCATOR          |
+|                   | GET    | `/documents`                          | JWT     | ORG_ADMIN+               |
+|                   | GET    | `/documents/:id`                      | JWT     | ORG_ADMIN+, OWNER        |
+|                   | POST   | `/documents/:id/renew`                | JWT     | OWNER                    |
+| **Messaging**     | POST   | `/messages`                           | JWT     | PARENT, EDUCATOR         |
+|                   | GET    | `/messages/threads`                   | JWT     | All                      |
+|                   | GET    | `/messages/threads/:id`               | JWT     | Participant              |
+|                   | POST   | `/announcements`                      | JWT     | OWNER, ORG_ADMIN         |
+| **Activities**    | POST   | `/activities`                         | JWT     | EDUCATOR                 |
+|                   | GET    | `/activities/child/:id`               | JWT     | PARENT, EDUCATOR         |
+| **Incidents**     | POST   | `/incidents`                          | JWT     | EDUCATOR                 |
+|                   | GET    | `/incidents/:id`                      | JWT     | PARENT, OWNER            |
+|                   | POST   | `/incidents/:id/acknowledge`          | JWT     | PARENT                   |
+| **Reports**       | GET    | `/reports/attendance`                 | JWT     | ORG_ADMIN+               |
+|                   | GET    | `/reports/financial`                  | JWT     | ORG_ADMIN, BILLING_ONLY  |
+|                   | GET    | `/reports/compliance`                 | JWT     | ORG_ADMIN+, GOVERNMENT   |
+|                   | GET    | `/reports/enrollment`                 | JWT     | ORG_ADMIN+, GOVERNMENT   |
+|                   | GET    | `/dashboard`                          | JWT     | ORG_ADMIN+               |
+| **Health**        | GET    | `/health`                             | Public  | —                        |
+| **Storage**       | POST   | `/storage/upload`                     | JWT     | All authed               |
+| **Notifications** | POST   | `/notifications/register-device`      | JWT     | All                      |
+|                   | GET    | `/notifications/preferences`          | JWT     | All                      |
+|                   | PATCH  | `/notifications/preferences`          | JWT     | All                      |
 
 ### API Conventions
 
 - **Versioning**: URI prefix `/api/v1/`. Breaking changes → `/api/v2/`.
 - **HTTP Methods**: GET (read), POST (create), PATCH (partial update), DELETE (soft delete)
 - **Status codes**: 200 (success), 201 (created), 400 (validation), 401 (unauth), 403 (forbidden), 404 (not found), 429 (rate limit), 500 (server error)
-- **Rate limiting**: 100 req/min per IP (general), 5 login attempts/15 min, 10 uploads/min per IP
+- **Rate limiting**: 20 req/min globally, 5 login attempts/15 min
 - **Soft delete**: All entities have `deletedAt` (paranoid: true). Queries exclude deleted by default.
 
 ---
@@ -676,84 +680,84 @@ Reporting Engine (aggregated queries, materialized views)
 
 Agency staff portal. Full oversight of all organizations, dayhomes, compliance, billing, and reporting.
 
-| Route | Page | Sprint |
-|---|---|---|
-| `/login` | Login | S0 ✅ |
-| `/register` | Register | S0 ✅ |
-| `/forgot-password` | Forgot password | S1 |
-| `/reset-password` | Reset password | S1 |
-| `/dashboard` | Main dashboard with KPI cards | S0 ✅ (stub) → S9 |
-| `/organizations` | Organization list | S1 |
-| `/organizations/[id]` | Organization detail & settings | S1 |
-| `/organizations/[id]/staff` | Staff management & roles | S1 |
-| `/dayhomes` | All dayhomes list with filters | S2 |
-| `/dayhomes/[id]` | Dayhome detail | S2 |
-| `/dayhomes/[id]/rooms` | Room management | S2 |
-| `/dayhomes/[id]/documents` | Document compliance | S7 |
-| `/educators` | All educators (org-wide) | S3 |
-| `/educators/[id]` | Educator detail | S3 |
-| `/attendance/history` | Attendance reports | S5 |
-| `/billing/invoices` | All invoices | S6 |
-| `/billing/subsidies` | Subsidy management | S6 |
-| `/billing/reports` | Financial reports | S6 |
-| `/compliance` | Compliance dashboard | S7 |
-| `/reports/attendance` | Attendance analytics | S9 |
-| `/reports/financial` | Financial analytics | S9 |
-| `/reports/compliance` | Compliance analytics | S9 |
-| `/reports/enrollment` | Enrollment analytics | S9 |
-| `/settings` | Org settings | S1 |
-| `/audit-logs` | Audit log viewer | S1 |
+| Route                       | Page                           | Sprint            |
+| --------------------------- | ------------------------------ | ----------------- |
+| `/login`                    | Login                          | S0 ✅             |
+| `/register`                 | Register                       | S0 ✅             |
+| `/forgot-password`          | Forgot password                | S1                |
+| `/reset-password`           | Reset password                 | S1                |
+| `/dashboard`                | Main dashboard with KPI cards  | S0 ✅ (stub) → S9 |
+| `/organizations`            | Organization list              | S1                |
+| `/organizations/[id]`       | Organization detail & settings | S1                |
+| `/organizations/[id]/staff` | Staff management & roles       | S1                |
+| `/dayhomes`                 | All dayhomes list with filters | S2                |
+| `/dayhomes/[id]`            | Dayhome detail                 | S2                |
+| `/dayhomes/[id]/rooms`      | Room management                | S2                |
+| `/dayhomes/[id]/documents`  | Document compliance            | S7                |
+| `/educators`                | All educators (org-wide)       | S3                |
+| `/educators/[id]`           | Educator detail                | S3                |
+| `/attendance/history`       | Attendance reports             | S5                |
+| `/billing/invoices`         | All invoices                   | S6                |
+| `/billing/subsidies`        | Subsidy management             | S6                |
+| `/billing/reports`          | Financial reports              | S6                |
+| `/compliance`               | Compliance dashboard           | S7                |
+| `/reports/attendance`       | Attendance analytics           | S9                |
+| `/reports/financial`        | Financial analytics            | S9                |
+| `/reports/compliance`       | Compliance analytics           | S9                |
+| `/reports/enrollment`       | Enrollment analytics           | S9                |
+| `/settings`                 | Org settings                   | S1                |
+| `/audit-logs`               | Audit log viewer               | S1                |
 
 ### 8.2 Web Dayhome Owner (`apps/web-dayhome`) — Port 3001
 
 Dayhome owner portal. Manage their own dayhome operations.
 
-| Route | Page | Sprint |
-|---|---|---|
-| `/login` | Login | S2 |
-| `/dashboard` | Daily overview | S2 |
-| `/rooms` | Room management | S2 |
-| `/educators` | Staff list management | S3 |
-| `/educators/new` | Add educator | S3 |
-| `/scheduling` | Shift scheduling grid | S3 |
-| `/educators/[id]/schedule` | Educator schedule | S3 |
-| `/educators/[id]/pto` | PTO management | S3 |
-| `/daily-board` | Daily attendance board | S5 |
-| `/attendance/history` | Attendance history | S5 |
-| `/billing/invoices` | Invoice management | S6 |
-| `/billing/subsidies` | Family subsidies | S6 |
-| `/billing/reports` | Financial reports | S6 |
-| `/documents` | Document upload & compliance | S7 |
-| `/documents/upload` | Upload document | S7 |
-| `/compliance` | Compliance status | S7 |
-| `/messages` | Messages & announcements | S8 |
-| `/announcements` | Send announcements | S8 |
-| `/incidents` | Incident reports | S8 |
-| `/settings` | Dayhome settings | S2 |
+| Route                      | Page                         | Sprint |
+| -------------------------- | ---------------------------- | ------ |
+| `/login`                   | Login                        | S2     |
+| `/dashboard`               | Daily overview               | S2     |
+| `/rooms`                   | Room management              | S2     |
+| `/educators`               | Staff list management        | S3     |
+| `/educators/new`           | Add educator                 | S3     |
+| `/scheduling`              | Shift scheduling grid        | S3     |
+| `/educators/[id]/schedule` | Educator schedule            | S3     |
+| `/educators/[id]/pto`      | PTO management               | S3     |
+| `/daily-board`             | Daily attendance board       | S5     |
+| `/attendance/history`      | Attendance history           | S5     |
+| `/billing/invoices`        | Invoice management           | S6     |
+| `/billing/subsidies`       | Family subsidies             | S6     |
+| `/billing/reports`         | Financial reports            | S6     |
+| `/documents`               | Document upload & compliance | S7     |
+| `/documents/upload`        | Upload document              | S7     |
+| `/compliance`              | Compliance status            | S7     |
+| `/messages`                | Messages & announcements     | S8     |
+| `/announcements`           | Send announcements           | S8     |
+| `/incidents`               | Incident reports             | S8     |
+| `/settings`                | Dayhome settings             | S2     |
 
 ### 8.3 Web Parent (`apps/web-parent`) — Port 3002
 
 Parent/family portal. Their children, invoices, messages, daily updates.
 
-| Route | Page | Sprint |
-|---|---|---|
-| `/login` | Login | S4 |
-| `/register` | Family registration | S4 |
-| `/forgot-password` | Forgot password | S4 |
-| `/dashboard` | My children overview | S4 |
-| `/children` | Children list | S4 |
-| `/children/new` | Add child | S4 |
-| `/children/[id]` | Child detail & daily feed | S4 |
-| `/children/[id]/medical` | Medical info | S4 |
-| `/children/[id]/pickups` | Authorized pickups | S4 |
-| `/enrollment` | Browse & enroll in dayhomes | S4 |
-| `/invoices` | My invoices | S6 |
-| `/invoices/[id]` | Invoice detail | S6 |
-| `/payments` | Payment history | S6 |
-| `/messages` | Messages with educators | S8 |
-| `/activities` | Child activity feed | S8 |
-| `/incidents` | Incident history | S8 |
-| `/settings/notifications` | Notification preferences | S8 |
+| Route                     | Page                        | Sprint |
+| ------------------------- | --------------------------- | ------ |
+| `/login`                  | Login                       | S4     |
+| `/register`               | Family registration         | S4     |
+| `/forgot-password`        | Forgot password             | S4     |
+| `/dashboard`              | My children overview        | S4     |
+| `/children`               | Children list               | S4     |
+| `/children/new`           | Add child                   | S4     |
+| `/children/[id]`          | Child detail & daily feed   | S4     |
+| `/children/[id]/medical`  | Medical info                | S4     |
+| `/children/[id]/pickups`  | Authorized pickups          | S4     |
+| `/enrollment`             | Browse & enroll in dayhomes | S4     |
+| `/invoices`               | My invoices                 | S6     |
+| `/invoices/[id]`          | Invoice detail              | S6     |
+| `/payments`               | Payment history             | S6     |
+| `/messages`               | Messages with educators     | S8     |
+| `/activities`             | Child activity feed         | S8     |
+| `/incidents`              | Incident history            | S8     |
+| `/settings/notifications` | Notification preferences    | S8     |
 
 ### 8.4 Mobile Apps (`apps/mobile-educator`, `apps/mobile-parent`) — Sprint 10
 
@@ -765,79 +769,79 @@ React Native (Expo) apps. Core mobile workflows: check-in/out, daily board, noti
 
 ### What's Built (Sprint 0 — ~90% Complete)
 
-| Component | Status | Details |
-|---|---|---|
-| Monorepo scaffold | ✅ Complete | pnpm workspaces, Turborepo, tsconfig.base.json |
-| Docker Compose | ✅ Complete | PostgreSQL 15, Redis 7, MinIO, ClamAV, Mailpit, Prometheus, Grafana |
-| NestJS API scaffold | ✅ Complete | main.ts with global pipes, filters, interceptors, Swagger, Bull Board, Pino logger |
-| Database models (13) | ✅ Complete | All entities defined with Sequelize decorators |
-| Database migration | ✅ Complete | Full schema with all tables, indexes, foreign keys |
-| Seed data | ✅ Complete | Demo data: org, users, dayhomes, rooms, educators, families, children, enrollments, attendance |
-| Auth module | ✅ Complete | JWT dual-token (access + refresh), login, register, refresh, logout, me |
-| Auth guards | ✅ Complete | JwtAuthGuard, RolesGuard, PermissionsGuard, CurrentUser decorator |
-| Users module | ✅ Complete | Create, findByEmail, findById |
-| Health module | ✅ Complete | Postgres + Redis health checks |
-| Redis module | ✅ Complete | ioredis client, set/get/del/exists |
-| Mail module | ✅ Complete | MailerService with BullMQ queue |
-| Queue infrastructure | ✅ Partial | BullMQ queues registered (email, dead-letter), email processor exists, dashboard dir is empty |
-| Storage module | ✅ Partial | MinIO upload works, but no document management (just raw file upload) |
-| Web-admin pages | ✅ Partial | Login, Register, Dashboard stub (3 placeholder KPI cards), middleware, layout with sidebar |
-| Axios client | ✅ Complete | Auto-refresh on 401, request queuing |
-| Zustand auth store | ✅ Complete | user, accessToken, isAuthenticated, setTokens, clearAuth |
-| shared-types package | ✅ Complete | Enums, interfaces, API envelope, error codes, constants |
-| ui-kit package | ✅ Partial | Button, Input, Badge, Card — missing Modal, Select, DataTable, Tabs, DropdownMenu |
-| ESLint + Prettier | ✅ Complete | Flat config, .prettierrc |
-| Husky + lint-staged | ✅ Complete | Git hooks |
-| .env files | ✅ Complete | .env.development, .env.example |
+| Component            | Status      | Details                                                                                        |
+| -------------------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| Monorepo scaffold    | ✅ Complete | pnpm workspaces, Turborepo, tsconfig.base.json                                                 |
+| Docker Compose       | ✅ Complete | PostgreSQL 15, Redis 7, MinIO, ClamAV, Mailpit, Prometheus, Grafana                            |
+| NestJS API scaffold  | ✅ Complete | main.ts with global pipes, filters, interceptors, Swagger, Bull Board, Pino logger             |
+| Database models (13) | ✅ Complete | All entities defined with Sequelize decorators                                                 |
+| Database migration   | ✅ Complete | Full schema with all tables, indexes, foreign keys                                             |
+| Seed data            | ✅ Complete | Demo data: org, users, dayhomes, rooms, educators, families, children, enrollments, attendance |
+| Auth module          | ✅ Complete | JWT dual-token (access + refresh), login, register, refresh, logout, me                        |
+| Auth guards          | ✅ Complete | JwtAuthGuard, RolesGuard, PermissionsGuard, CurrentUser decorator                              |
+| Users module         | ✅ Complete | Create, findByEmail, findById                                                                  |
+| Health module        | ✅ Complete | Postgres + Redis health checks                                                                 |
+| Redis module         | ✅ Complete | ioredis client, set/get/del/exists                                                             |
+| Mail module          | ✅ Complete | MailerService with BullMQ queue                                                                |
+| Queue infrastructure | ✅ Partial  | BullMQ queues registered (email, dead-letter), email processor exists, dashboard dir is empty  |
+| Storage module       | ✅ Partial  | MinIO upload works, but no document management (just raw file upload)                          |
+| Web-admin pages      | ✅ Partial  | Login, Register, Dashboard stub (3 placeholder KPI cards), middleware, layout with sidebar     |
+| Axios client         | ✅ Complete | Auto-refresh on 401, request queuing                                                           |
+| Zustand auth store   | ✅ Complete | user, accessToken, isAuthenticated, setTokens, clearAuth                                       |
+| shared-types package | ✅ Complete | Enums, interfaces, API envelope, error codes, constants                                        |
+| ui-kit package       | ✅ Partial  | Button, Input, Badge, Card — missing Modal, Select, DataTable, Tabs, DropdownMenu              |
+| ESLint + Prettier    | ✅ Complete | Flat config, .prettierrc                                                                       |
+| Husky + lint-staged  | ✅ Complete | Git hooks                                                                                      |
+| .env files           | ✅ Complete | .env.development, .env.example                                                                 |
 
 ### What's NOT Built
 
-| Module | Sprint | Backend | Frontend |
-|---|---|---|---|
-| Organization CRUD | S1 | ❌ | ❌ |
-| Staff invitation flow | S1 | ❌ | ❌ |
-| Roles & permissions UI | S1 | ❌ | ❌ |
-| Audit log viewer | S1 | ❌ | ❌ |
-| Forgot/reset password | S1 | ❌ | ✅ Stub calls |
-| API intake webhook | S2 | ❌ | N/A |
-| Dayhome management | S2 | ❌ | ❌ |
-| Room management | S2 | ❌ | ❌ |
-| Dayhome approval workflow | S2 | ❌ | ❌ |
-| Educator management | S3 | ❌ | ❌ |
-| Shift scheduling | S3 | ❌ | ❌ |
-| PTO management | S3 | ❌ | ❌ |
-| Time clock | S3 | ❌ | ❌ |
-| Family registration | S4 | ❌ | ❌ |
-| Child profiles | S4 | ❌ | ❌ |
-| Authorized pickups | S4 | ❌ | ❌ |
-| Enrollment & waitlist | S4 | ❌ | ❌ |
-| Check-in/out | S5 | ❌ | ❌ |
-| Daily board (real-time) | S5 | ❌ | ❌ |
-| Ratio monitoring | S5 | ❌ | ❌ |
-| Invoice generation | S6 | ❌ | ❌ |
-| Payment tracking | S6 | ❌ | ❌ |
-| Subsidy management | S6 | ❌ | ❌ |
-| Financial reports | S6 | ❌ | ❌ |
-| Document upload/virus scan | S7 | ❌ | ❌ |
-| Expiry tracking & alerts | S7 | ❌ | ❌ |
-| Compliance dashboard | S7 | ❌ | ❌ |
-| Messaging & chat | S8 | ❌ | ❌ |
-| Announcements | S8 | ❌ | ❌ |
-| Activity logging | S8 | ❌ | ❌ |
-| Incident reports | S8 | ❌ | ❌ |
-| Push notifications | S8 | ❌ | ❌ |
-| Reporting engine | S9 | ❌ | ❌ |
-| KPI dashboards | S9 | ❌ | ❌ |
-| CSV/PDF export | S9 | ❌ | ❌ |
-| Government read-only | S9 | ❌ | ❌ |
-| Mobile apps (Expo) | S10 | ❌ | ❌ |
-| i18n (EN/FR) | S10 | ❌ | ❌ |
-| WCAG accessibility | S10 | ❌ | ❌ |
-| Offline support | S10 | ❌ | ❌ |
-| web-dayhome portal | All | N/A | ❌ (empty directory) |
-| web-parent portal | All | N/A | ❌ (empty directory) |
-| shared-utils package | S0 | N/A | ❌ (empty directory) |
-| shared-constraints package | S0 | N/A | ❌ (empty directory) |
+| Module                     | Sprint | Backend | Frontend             |
+| -------------------------- | ------ | ------- | -------------------- |
+| Organization CRUD          | S1     | ❌      | ❌                   |
+| Staff invitation flow      | S1     | ❌      | ❌                   |
+| Roles & permissions UI     | S1     | ❌      | ❌                   |
+| Audit log viewer           | S1     | ❌      | ❌                   |
+| Forgot/reset password      | S1     | ❌      | ✅ Stub calls        |
+| API intake webhook         | S2     | ❌      | N/A                  |
+| Dayhome management         | S2     | ❌      | ❌                   |
+| Room management            | S2     | ❌      | ❌                   |
+| Dayhome approval workflow  | S2     | ❌      | ❌                   |
+| Educator management        | S3     | ❌      | ❌                   |
+| Shift scheduling           | S3     | ❌      | ❌                   |
+| PTO management             | S3     | ❌      | ❌                   |
+| Time clock                 | S3     | ❌      | ❌                   |
+| Family registration        | S4     | ❌      | ❌                   |
+| Child profiles             | S4     | ❌      | ❌                   |
+| Authorized pickups         | S4     | ❌      | ❌                   |
+| Enrollment & waitlist      | S4     | ❌      | ❌                   |
+| Check-in/out               | S5     | ❌      | ❌                   |
+| Daily board (real-time)    | S5     | ❌      | ❌                   |
+| Ratio monitoring           | S5     | ❌      | ❌                   |
+| Invoice generation         | S6     | ❌      | ❌                   |
+| Payment tracking           | S6     | ❌      | ❌                   |
+| Subsidy management         | S6     | ❌      | ❌                   |
+| Financial reports          | S6     | ❌      | ❌                   |
+| Document upload/virus scan | S7     | ❌      | ❌                   |
+| Expiry tracking & alerts   | S7     | ❌      | ❌                   |
+| Compliance dashboard       | S7     | ❌      | ❌                   |
+| Messaging & chat           | S8     | ❌      | ❌                   |
+| Announcements              | S8     | ❌      | ❌                   |
+| Activity logging           | S8     | ❌      | ❌                   |
+| Incident reports           | S8     | ❌      | ❌                   |
+| Push notifications         | S8     | ❌      | ❌                   |
+| Reporting engine           | S9     | ❌      | ❌                   |
+| KPI dashboards             | S9     | ❌      | ❌                   |
+| CSV/PDF export             | S9     | ❌      | ❌                   |
+| Government read-only       | S9     | ❌      | ❌                   |
+| Mobile apps (Expo)         | S10    | ❌      | ❌                   |
+| i18n (EN/FR)               | S10    | ❌      | ❌                   |
+| WCAG accessibility         | S10    | ❌      | ❌                   |
+| Offline support            | S10    | ❌      | ❌                   |
+| web-dayhome portal         | All    | N/A     | ❌ (empty directory) |
+| web-parent portal          | All    | N/A     | ❌ (empty directory) |
+| shared-utils package       | S0     | N/A     | ❌ (empty directory) |
+| shared-constraints package | S0     | N/A     | ❌ (empty directory) |
 
 ---
 
@@ -846,6 +850,7 @@ React Native (Expo) apps. Core mobile workflows: check-in/out, daily board, noti
 ### Corrected Sprint Plan (Reflecting Actual Architecture)
 
 The following supersedes the previous sprint plan. Key corrections:
+
 - **Sprint 2 changed**: API intake webhook replaces manual dayhome registration
 - **Sprint 1 includes**: Password reset backend (currently stubbed)
 - **Sprint 5 includes**: Digital health screening at check-in
@@ -854,9 +859,10 @@ The following supersedes the previous sprint plan. Key corrections:
 
 ### Sprint 0 — Foundation & Architecture (Week 1–2) ✅ COMPLETE
 
-*Status: ~90% done — close out remaining items*
+_Status: ~90% done — close out remaining items_
 
 **Remaining work:**
+
 - [ ] Complete ui-kit: Modal, Select, DataTable, Tabs, DropdownMenu
 - [ ] Populate `shared-utils` (date formatting, cn utility, validation helpers)
 - [ ] Populate `shared-constraints` (regex patterns, validation rules, role hierarchy)
@@ -874,6 +880,7 @@ The following supersedes the previous sprint plan. Key corrections:
 **Goal:** SUPER_ADMIN manages organizations; ORG_ADMIN invites staff, manages roles; password reset works.
 
 **Backend:**
+
 - [ ] Organization CRUD module (Controller → Service → Repository)
 - [ ] Staff invitation flow (invite → email → set password → activate)
 - [ ] RBAC: Roles & Permissions decorators on all routes
@@ -883,6 +890,7 @@ The following supersedes the previous sprint plan. Key corrections:
 - [ ] Rate limiting: 5 login attempts/15 min per IP
 
 **Frontend (Web Admin):**
+
 - [ ] Organization list page (`/organizations`)
 - [ ] Organization detail + settings page
 - [ ] Staff list + invite modal
@@ -891,6 +899,7 @@ The following supersedes the previous sprint plan. Key corrections:
 - [ ] Audit log viewer table
 
 **Definition of Done:**
+
 - [ ] Organization CRUD endpoints tested (Supertest)
 - [ ] Staff invitation → email → registration flow end-to-end
 - [ ] Password reset flow works (token in email → set new password)
@@ -904,6 +913,7 @@ The following supersedes the previous sprint plan. Key corrections:
 **IMPORTANT:** This sprint differs from the old plan. Dayhomes arrive via API intake webhook from the external Application Portal, NOT via manual registration by DAYHOME_OWNER.
 
 **Backend:**
+
 - [ ] `POST /api/v1/dayhomes/intake` webhook (receive approved dayhome from external portal)
 - [ ] Dayhome CRUD (list, detail, update)
 - [ ] Status transitions: ACTIVE ↔ SUSPENDED ↔ CLOSED
@@ -914,6 +924,7 @@ The following supersedes the previous sprint plan. Key corrections:
 - [ ] Authorization: `@OrganizationAccess()` guard
 
 **Frontend (Web Admin):**
+
 - [ ] Dayhome list with status filters (`/dayhomes`)
 - [ ] Dayhome detail page (`/dayhomes/[id]`)
 - [ ] Dayhome status management (suspend/activate/close)
@@ -921,12 +932,14 @@ The following supersedes the previous sprint plan. Key corrections:
 - [ ] Intake log (audit trail of API-received dayhomes)
 
 **Frontend (Web Dayhome) — FIRST PORTAL BUILD:**
+
 - [ ] Scaffold `apps/web-dayhome` (Next.js 14, same stack as admin)
 - [ ] Login page + auth middleware
 - [ ] Dashboard with daily snapshot
 - [ ] Room management (owner view)
 
 **Definition of Done:**
+
 - [ ] API intake webhook receives, validates, creates dayhome
 - [ ] Dayhome status transitions work (suspend blocks check-ins)
 - [ ] Room capacity cannot be reduced below current enrollment
@@ -938,6 +951,7 @@ The following supersedes the previous sprint plan. Key corrections:
 ### Sprint 3 — Educator Management (Week 7–8)
 
 **Backend:**
+
 - [ ] Educator CRUD (profiles, certifications)
 - [ ] Shift scheduling (weekly patterns with overrides)
 - [ ] PTO request → approval/rejection with ratio validation
@@ -946,6 +960,7 @@ The following supersedes the previous sprint plan. Key corrections:
 - [ ] Certification tracking with expiry alerts
 
 **Frontend (Web Dayhome):**
+
 - [ ] Educator list page
 - [ ] Add educator form with certification fields
 - [ ] Weekly schedule grid (drag-and-drop shifts)
@@ -954,10 +969,12 @@ The following supersedes the previous sprint plan. Key corrections:
 - [ ] Hour summary table
 
 **Frontend (Web Admin):**
+
 - [ ] Org-wide educator view
 - [ ] Educator detail page
 
 **Definition of Done:**
+
 - [ ] Educator CRUD with certification tracking
 - [ ] Shift patterns with weekly recurrence
 - [ ] PTO approval checks ratio before approving
@@ -970,6 +987,7 @@ The following supersedes the previous sprint plan. Key corrections:
 ### Sprint 4 — Family & Child Management (Week 9–10)
 
 **Backend:**
+
 - [ ] Family registration module
 - [ ] Child profile CRUD with medical info (encrypted at rest)
 - [ ] Authorized pickup management (with PIN hashing)
@@ -979,6 +997,7 @@ The following supersedes the previous sprint plan. Key corrections:
 - [ ] Events: `child.enrolled`, `child.waitlisted`
 
 **Frontend (Web Parent) — SECOND PORTAL BUILD:**
+
 - [ ] Scaffold `apps/web-parent` (Next.js 14)
 - [ ] Family registration wizard
 - [ ] Child profile form (multi-step: basics → medical → pickups)
@@ -987,6 +1006,7 @@ The following supersedes the previous sprint plan. Key corrections:
 - [ ] Child dashboard with daily activity feed (read-only for now)
 
 **Definition of Done:**
+
 - [ ] Family registration with email verification
 - [ ] Child CRUD with encrypted medical notes
 - [ ] Authorized pickup PIN verified on check-out
@@ -998,6 +1018,7 @@ The following supersedes the previous sprint plan. Key corrections:
 ### Sprint 5 — Attendance & Daily Operations (Week 11–12)
 
 **Backend:**
+
 - [ ] Check-in/out with verification (PIN or name search)
 - [ ] Digital health screening (temperature, symptom questionnaire)
 - [ ] Real-time daily board via Socket.io
@@ -1007,6 +1028,7 @@ The following supersedes the previous sprint plan. Key corrections:
 - [ ] Schedule preference submission (parent) + approval (educator)
 
 **Frontend (Web Dayhome):**
+
 - [ ] Daily board page (real-time via Socket.io)
 - [ ] Check-in modal (search child → confirm)
 - [ ] Check-out modal (authorized pickup PIN verification)
@@ -1015,10 +1037,12 @@ The following supersedes the previous sprint plan. Key corrections:
 - [ ] Attendance history table
 
 **Frontend (Web Parent):**
+
 - [ ] Schedule preference form (weekly day checkboxes)
 - [ ] Real-time attendance notifications (check-in/out alerts)
 
 **Definition of Done:**
+
 - [ ] Check-in/out with PIN or photo verification
 - [ ] Health screening recorded at check-in
 - [ ] Daily board updates in real-time via Socket.io
@@ -1034,14 +1058,15 @@ The following supersedes the previous sprint plan. Key corrections:
 
 The invoice engine, payment data model, and reconciliation logic change significantly based on this choice:
 
-| Option | Effort | Risk | Recommendation |
-|---|---|---|---|
-| **Mock-only** (manual "mark as paid") | Low | Rewrite later if real payments needed | OK only if agency explicitly confirms no Stripe integration |
-| **Full Stripe** (PaymentIntent, webhooks, reconciliation) | Medium-High | More upfront but no rewrite | **Recommended** if there's any chance of real payments |
+| Option                                                    | Effort      | Risk                                  | Recommendation                                              |
+| --------------------------------------------------------- | ----------- | ------------------------------------- | ----------------------------------------------------------- |
+| **Mock-only** (manual "mark as paid")                     | Low         | Rewrite later if real payments needed | OK only if agency explicitly confirms no Stripe integration |
+| **Full Stripe** (PaymentIntent, webhooks, reconciliation) | Medium-High | More upfront but no rewrite           | **Recommended** if there's any chance of real payments      |
 
 Build the data model for Stripe from day one (PaymentIntent ID, webhook events, refund tracking) even if the integration itself is deferred — this avoids a schema migration later.
 
 **Backend:**
+
 - [ ] Invoice generation engine (BullMQ weekly job)
 - [ ] Pricing model: daily rate × days attended
 - [ ] Subsidy management (percentage or fixed)
@@ -1051,6 +1076,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 - [ ] `Decimal` type for all monetary values
 
 **Frontend (Web Dayhome + Web Admin):**
+
 - [ ] Invoice list with status filters
 - [ ] Invoice detail with line items
 - [ ] Payment recording form
@@ -1059,12 +1085,14 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 - [ ] Credit/refund form
 
 **Frontend (Web Parent):**
+
 - [ ] My invoices list
 - [ ] Invoice detail view
 - [ ] Payment history
 - [ ] Payment method (mock or Stripe Elements)
 
 **Definition of Done:**
+
 - [ ] Invoice auto-generation from attendance
 - [ ] Subsidy auto-applied to invoices
 - [ ] Payment recording (mock or Stripe)
@@ -1076,6 +1104,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 ### Sprint 7 — Document & Compliance Management (Week 15–16)
 
 **Backend:**
+
 - [ ] Document upload with virus scanning (ClamAV)
 - [ ] File storage in R2/S3 with signed URLs (15 min expiry)
 - [ ] Document type & expiry tracking
@@ -1085,18 +1114,21 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 - [ ] Government read-only access
 
 **Frontend (Web Dayhome):**
+
 - [ ] Document upload form (drag-and-drop, type selector, expiry)
 - [ ] Document list with expiry progress bars
 - [ ] Document renewal flow
 - [ ] Compliance status card
 
 **Frontend (Web Admin):**
+
 - [ ] Compliance dashboard (all dayhomes)
 - [ ] Expiry calendar view
 - [ ] Document preview (read-only)
 - [ ] Government view (restricted data set)
 
 **Definition of Done:**
+
 - [ ] Upload → ClamAV scan → R2 storage → metadata saved
 - [ ] Expiry alerts at 60/30/14/7 days
 - [ ] Renewal creates version history
@@ -1108,6 +1140,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 ### Sprint 8 — Messaging, Activities & Notifications (Week 17–18)
 
 **Backend:**
+
 - [ ] Thread-based messaging (parent ↔ educator)
 - [ ] Announcements (owner broadcasts to all parents)
 - [ ] Activity logging (meals, naps, diaper, mood, photos)
@@ -1118,6 +1151,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 - [ ] Socket.io for real-time chat + badge counts
 
 **Frontend (All Portals):**
+
 - [ ] In-app messaging UI (chat-style)
 - [ ] Thread list with unread badges
 - [ ] Announcement composer (rich text)
@@ -1127,6 +1161,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 - [ ] Notification preferences page
 
 **Definition of Done:**
+
 - [ ] Thread-based messaging with read receipts
 - [ ] Announcements delivered to all enrolled families
 - [ ] Activity log with photo upload (max 5 per entry)
@@ -1139,6 +1174,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 ### Sprint 9 — Reporting & Analytics (Week 19–20)
 
 **Backend:**
+
 - [ ] Reporting module with aggregated queries
 - [ ] Materialized views for complex reports (refresh nightly)
 - [ ] Attendance report (daily/monthly/custom range)
@@ -1150,6 +1186,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 - [ ] Caching: dashboard data (TTL 5 min), reports (TTL 1 h)
 
 **Frontend (Web Admin):**
+
 - [ ] Dashboard with KPI cards (total children, attendance %, revenue, compliance %)
 - [ ] Attendance report with line chart and filters
 - [ ] Financial report with revenue by dayhome bar chart
@@ -1159,6 +1196,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 - [ ] Government view (read-only, restricted data)
 
 **Definition of Done:**
+
 - [ ] All 4 report types functional with filters
 - [ ] KPI dashboard with real data (not placeholders)
 - [ ] CSV and PDF export working
@@ -1171,6 +1209,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 ### Sprint 10 — Mobile Apps, i18n & Polish (Week 21–24)
 
 **Backend:**
+
 - [ ] Mobile-specific endpoints (lightweight payloads, batch sync)
 - [ ] `POST /sync` for offline records
 - [ ] Push notification registration (`POST /devices/register`)
@@ -1178,6 +1217,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 - [ ] Higher rate limits for mobile (300 req/min)
 
 **Mobile (Expo — Educator App):**
+
 - [ ] Daily board with real-time check-in/out
 - [ ] Child check-in/out with PIN
 - [ ] Activity logging with photo upload
@@ -1186,6 +1226,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 - [ ] Biometric login (FaceID/TouchID/PIN)
 
 **Mobile (Expo — Parent App):**
+
 - [ ] Push notifications
 - [ ] Child activity feed
 - [ ] Messaging
@@ -1193,6 +1234,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 - [ ] Attendance history
 
 **Cross-Cutting (Finish — scaffolded in Sprint 0, applied throughout):**
+
 - [ ] i18n audit: verify all user-visible strings use translation keys (no hardcoded English)
 - [ ] French locale: complete translation files (EN/FR), locale auto-detection
 - [ ] WCAG 2.1 AA final audit: axe DevTools scan passes (0 critical/serious violations)
@@ -1202,6 +1244,7 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 - [ ] `CurriculumPlan`, `DevelopmentalAssessment`, `MealPlan` models (deferred features)
 
 **Definition of Done:**
+
 - [ ] Both mobile apps build and run via Expo
 - [ ] Offline check-in queues and syncs
 - [ ] French locale detection and rendering
@@ -1215,12 +1258,12 @@ Build the data model for Stripe from day one (PaymentIntent ID, webhook events, 
 
 ### Prerequisites
 
-| Tool | Version | Install |
-|---|---|---|
-| Node.js | 20 LTS | `nvm install 20` |
-| pnpm | 9+ | `npm install -g pnpm` |
-| Docker Desktop | Latest | [docker.com](https://docker.com) |
-| Git | Latest | [git-scm.com](https://git-scm.com) |
+| Tool           | Version | Install                            |
+| -------------- | ------- | ---------------------------------- |
+| Node.js        | 20 LTS  | `nvm install 20`                   |
+| pnpm           | 9+      | `npm install -g pnpm`              |
+| Docker Desktop | Latest  | [docker.com](https://docker.com)   |
+| Git            | Latest  | [git-scm.com](https://git-scm.com) |
 
 ### Quick Start
 
@@ -1247,6 +1290,7 @@ pnpm dev
 ```
 
 This starts:
+
 - API on `http://localhost:4000`
 - Web Admin on `http://localhost:3000`
 - Swagger docs at `http://localhost:4000/api/docs`
@@ -1276,17 +1320,17 @@ src/modules/<name>/
 
 ### Coding Standards
 
-| Rule | Standard |
-|---|---|
-| TypeScript | `strict: true` — no `any`, no `@ts-ignore` |
-| Exports | Named exports only. No `export default` |
-| File naming | `kebab-case` for files |
-| Class naming | `PascalCase` for classes/components |
-| Variable naming | `camelCase` for variables/functions |
-| Commits | Conventional Commits: `feat(SCOPE-123): description` |
-| Branching | `main` (prod), `develop` (staging), `feat/SPICED-123-description` |
-| PR size | Max 400 lines changed per PR |
-| Testing | Jest for unit tests, Supertest for integration tests |
+| Rule            | Standard                                                          |
+| --------------- | ----------------------------------------------------------------- |
+| TypeScript      | `strict: true` — no `any`, no `@ts-ignore`                        |
+| Exports         | Named exports only. No `export default`                           |
+| File naming     | `kebab-case` for files                                            |
+| Class naming    | `PascalCase` for classes/components                               |
+| Variable naming | `camelCase` for variables/functions                               |
+| Commits         | Conventional Commits: `feat(SCOPE-123): description`              |
+| Branching       | `main` (prod), `develop` (staging), `feat/SPICED-123-description` |
+| PR size         | Max 400 lines changed per PR                                      |
+| Testing         | Jest for unit tests, Supertest for integration tests              |
 
 ### Database Migrations
 
@@ -1322,23 +1366,27 @@ export const ERROR_CODES = {
 ## 12. Security & Compliance
 
 ### Authentication
+
 - JWT dual-token: Access (15 min, in memory) + Refresh (7 days, HTTP-only cookie)
 - Refresh token rotation on each use
 - Rate limiting: 5 login attempts per 15 min per IP
 
 ### Authorization
+
 - RBAC: Role-based access at controller level (`@Roles()`)
 - Fine-grained: Permission-based at service level (`@Permissions()`)
 - Data isolation: Parent scoped to own family/children only
 - Organization scoping: Users can only access their organization's data
 
 ### Data Protection
+
 - Medical notes encrypted at rest (AES-256)
 - Pickup PINs hashed with bcrypt (never returned in API responses)
 - Files encrypted in R2/S3 (server-side encryption)
 - Signed URLs for file access (15 min expiry)
 
 ### File Upload Security
+
 - MIME type validation server-side
 - Max file size: 10 MB
 - Allowed types: PDF, JPG, PNG only (reject SVG — XSS risk)
@@ -1346,6 +1394,7 @@ export const ERROR_CODES = {
 - Temp file cleanup after upload (success or failure)
 
 ### Audit Trail
+
 - All create/update/delete operations logged
 - Audit record: `{ userId, action, entity, entityId, before, after, timestamp }`
 - Government document views logged
@@ -1355,14 +1404,14 @@ export const ERROR_CODES = {
 
 > **⚠️ Verify with agency compliance contact before finalizing.** The retention periods below are reasonable defaults based on common Canadian childcare regulation, but must be confirmed against the specific province's (e.g. Alberta) Child Care Licensing Regulation and PIPEDA requirements. Provincial variation exists in record-keeping obligations.
 
-| Data | Default Retention | Verification Needed |
-|---|---|---|
-| Attendance records | 7 years | ✅ Confirm with agency |
-| Documents (compliance) | 7 years after expiry | ✅ Confirm with agency |
-| Invoices/payments | 7 years | ✅ Confirm with agency (CRA requirement likely aligns) |
-| Messages | 2 years | ✅ Confirm with agency |
-| Activities (daily logs) | 1 year | ✅ Confirm with agency |
-| Incident reports | 7 years | ✅ Confirm with agency (likely longest requirement) |
+| Data                    | Default Retention    | Verification Needed                                    |
+| ----------------------- | -------------------- | ------------------------------------------------------ |
+| Attendance records      | 7 years              | ✅ Confirm with agency                                 |
+| Documents (compliance)  | 7 years after expiry | ✅ Confirm with agency                                 |
+| Invoices/payments       | 7 years              | ✅ Confirm with agency (CRA requirement likely aligns) |
+| Messages                | 2 years              | ✅ Confirm with agency                                 |
+| Activities (daily logs) | 1 year               | ✅ Confirm with agency                                 |
+| Incident reports        | 7 years              | ✅ Confirm with agency (likely longest requirement)    |
 
 ---
 
@@ -1372,72 +1421,74 @@ Key decisions that must be made explicitly and early, as they affect data model,
 
 ### ADR-001: Payment Integration — Mock vs Stripe
 
-| | |
-|---|---|
-| **Status** | **⏳ Decision required** before Sprint 6 |
-| **Context** | Invoices are generated from attendance records. Parents need to pay them. Two paths: (a) manual "mark as paid" with no real payment processing, or (b) full Stripe integration with PaymentIntents, webhooks, refunds, and reconciliation. |
-| **Trade-off** | Mock is cheaper upfront but requires a full rewrite if real payments are needed later. Stripe is more work now but the payment data model (PaymentIntent ID, webhook events, refund status) must be built into the schema from Sprint 6 regardless. |
-| **Recommendation** | Build the Invoice/Payment schema to accommodate Stripe fields (nullable if unused), confirm with agency whether real payment processing is a current requirement or a future one. |
-| **Owner** | PM to confirm with agency stakeholder |
+|                    |                                                                                                                                                                                                                                                     |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**         | **⏳ Decision required** before Sprint 6                                                                                                                                                                                                            |
+| **Context**        | Invoices are generated from attendance records. Parents need to pay them. Two paths: (a) manual "mark as paid" with no real payment processing, or (b) full Stripe integration with PaymentIntents, webhooks, refunds, and reconciliation.          |
+| **Trade-off**      | Mock is cheaper upfront but requires a full rewrite if real payments are needed later. Stripe is more work now but the payment data model (PaymentIntent ID, webhook events, refund status) must be built into the schema from Sprint 6 regardless. |
+| **Recommendation** | Build the Invoice/Payment schema to accommodate Stripe fields (nullable if unused), confirm with agency whether real payment processing is a current requirement or a future one.                                                                   |
+| **Owner**          | PM to confirm with agency stakeholder                                                                                                                                                                                                               |
 
 ### ADR-002: i18n Strategy — Progressive vs Big Bang
 
-| | |
-|---|---|
-| **Status** | **✅ Decided** — Progressive (scaffold in Sprint 0, apply from Sprint 1, French translation completed in Sprint 10) |
-| **Context** | Retrofitting i18n across 9 sprints of pages is far more expensive than extracting strings as they are written. |
+|              |                                                                                                                                                                               |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | **✅ Decided** — Progressive (scaffold in Sprint 0, apply from Sprint 1, French translation completed in Sprint 10)                                                           |
+| **Context**  | Retrofitting i18n across 9 sprints of pages is far more expensive than extracting strings as they are written.                                                                |
 | **Decision** | `react-i18next` scaffolded in Sprint 0. All new components use `t('key')` for user-visible strings. Sprint 10 audits for missed strings and completes the French locale file. |
 
 ### ADR-003: Accessibility — Progressive vs Big Bang
 
-| | |
-|---|---|
-| **Status** | **✅ Decided** — Progressive (eslint-plugin-jsx-a11y in Sprint 0, WCAG patterns followed from Sprint 1, final audit in Sprint 10) |
-| **Context** | Semantic HTML, aria attributes, keyboard navigation, and color contrast are far cheaper to build correctly the first time than to retrofit. |
+|              |                                                                                                                                                        |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Status**   | **✅ Decided** — Progressive (eslint-plugin-jsx-a11y in Sprint 0, WCAG patterns followed from Sprint 1, final audit in Sprint 10)                      |
+| **Context**  | Semantic HTML, aria attributes, keyboard navigation, and color contrast are far cheaper to build correctly the first time than to retrofit.            |
 | **Decision** | `eslint-plugin-jsx-a11y` added in Sprint 0. All components follow WCAG patterns from day one. Sprint 10 performs the compliance audit and remediation. |
 
 ### ADR-004: Dayhome Onboarding — Manual Registration vs API Intake
 
-| | |
-|---|---|
-| **Status** | **✅ Decided** — API Intake Webhook from external Application Portal |
-| **Context** | The agency already operates an Application Portal that handles dayhome applications, licensing review, and approval. Building a second registration flow creates duplication and reconciliation complexity. |
-| **Decision** | Dayhomes arrive pre-approved via `POST /api/v1/dayhomes/intake` with HMAC signature verification and idempotency key. No `PENDING` status in this system. |
+|              |                                                                                                                                                                                                             |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | **✅ Decided** — API Intake Webhook from external Application Portal                                                                                                                                        |
+| **Context**  | The agency already operates an Application Portal that handles dayhome applications, licensing review, and approval. Building a second registration flow creates duplication and reconciliation complexity. |
+| **Decision** | Dayhomes arrive pre-approved via `POST /api/v1/dayhomes/intake` with HMAC signature verification and idempotency key. No `PENDING` status in this system.                                                   |
 
 ### ADR-005: File Storage — MinIO (dev) / Cloudflare R2 (prod)
 
-| | |
-|---|---|
-| **Status** | **✅ Decided** |
-| **Context** | S3-compatible storage needed for documents, photos, and compliance files. R2 has no egress fees vs AWS S3. |
-| **Decision** | MinIO for local development. Cloudflare R2 for production. Same S3 API, config swap via env vars. |
+|              |                                                                                                            |
+| ------------ | ---------------------------------------------------------------------------------------------------------- |
+| **Status**   | **✅ Decided**                                                                                             |
+| **Context**  | S3-compatible storage needed for documents, photos, and compliance files. R2 has no egress fees vs AWS S3. |
+| **Decision** | MinIO for local development. Cloudflare R2 for production. Same S3 API, config swap via env vars.          |
 
 ### ADR-006: Real-Time Updates — Socket.io
 
-| | |
-|---|---|
-| **Status** | **✅ Decided** |
-| **Context** | Daily board, check-in/out notifications, messaging, and badge counts require real-time push. |
+|              |                                                                                                             |
+| ------------ | ----------------------------------------------------------------------------------------------------------- |
+| **Status**   | **✅ Decided**                                                                                              |
+| **Context**  | Daily board, check-in/out notifications, messaging, and badge counts require real-time push.                |
 | **Decision** | Socket.io with Redis adapter for horizontal scaling. Fallback to 30s polling if WebSocket connection fails. |
 
 ### ADR-007: Retention Periods — Verification Required
 
-| | |
-|---|---|
-| **Status** | **⏳ Decision required** — verify with agency compliance contact |
+|             |                                                                                                                                                                                                                        |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**  | **⏳ Decision required** — verify with agency compliance contact                                                                                                                                                       |
 | **Context** | Data retention obligations vary by province (Alberta, Ontario, etc.) under childcare licensing regulations and PIPEDA. Assumed defaults of 7 years for financial/compliance records may not match actual requirements. |
-| **Owner** | PM to confirm with agency stakeholder before Sprint 1 |
+| **Owner**   | PM to confirm with agency stakeholder before Sprint 1                                                                                                                                                                  |
 
 ---
 
 ## 14. Deployment & Infrastructure
 
 ### Development (Local)
+
 - Docker Compose: PostgreSQL 15, Redis 7, MinIO, ClamAV, Mailpit, Prometheus, Grafana
 - MinIO for S3-compatible file storage (console: `localhost:9001`)
 - Mailpit for email capture (UI: `localhost:8025`)
 
 ### Production (VPS)
+
 - **Host**: VPS with Docker or bare metal
 - **Reverse proxy**: Nginx or Caddy (SSL termination, rate limiting, gzip/brotli)
 - **Database**: Managed PostgreSQL or Docker with nightly backups
@@ -1449,14 +1500,14 @@ Key decisions that must be made explicitly and early, as they affect data model,
 
 ### Backup Strategy
 
-| Scenario | RTO | RPO | Action |
-|---|---|---|---|
-| Database corruption | 4h | 24h | Restore from latest encrypted backup |
-| Server failure | 2h | — | Spin up new VPS from snapshot, deploy latest |
-| File storage outage | 1h | — | Failover to secondary R2 region |
-| Security breach | 15min | — | Rotate secrets, revoke sessions, restore |
-| Accidental deletion | 24h | 24h | Point-in-time restore |
+| Scenario            | RTO   | RPO | Action                                       |
+| ------------------- | ----- | --- | -------------------------------------------- |
+| Database corruption | 4h    | 24h | Restore from latest encrypted backup         |
+| Server failure      | 2h    | —   | Spin up new VPS from snapshot, deploy latest |
+| File storage outage | 1h    | —   | Failover to secondary R2 region              |
+| Security breach     | 15min | —   | Rotate secrets, revoke sessions, restore     |
+| Accidental deletion | 24h   | 24h | Point-in-time restore                        |
 
 ---
 
-*This document is the single source of truth for the Spiced Dayhome Unified System. All other documentation (PDF, DOCX, previous sprint plans) should be considered superseded.*
+_This document is the single source of truth for the Spiced Dayhome Unified System. All other documentation (PDF, DOCX, previous sprint plans) should be considered superseded._

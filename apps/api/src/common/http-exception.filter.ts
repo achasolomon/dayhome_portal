@@ -3,7 +3,7 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
-  HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
@@ -13,6 +13,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
 
@@ -20,9 +22,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+      exception instanceof HttpException ? exception.getStatus() : 500;
+
+    if (status >= 500) {
+      this.logger.error(
+        `Exception on ${request.method} ${request.url}`,
+        exception instanceof Error ? exception.stack : String(exception),
+      );
+    } else {
+      this.logger.warn(
+        `${status} on ${request.method} ${request.url}: ${exception instanceof Error ? exception.message : String(exception)}`,
+      );
+    }
 
     const exceptionResponse =
       exception instanceof HttpException
@@ -33,9 +44,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       typeof exceptionResponse === 'string'
         ? exceptionResponse
         : isRecord(exceptionResponse) &&
-            typeof exceptionResponse.message === 'string'
+            Array.isArray(exceptionResponse.message)
           ? exceptionResponse.message
-          : 'Internal server error';
+          : isRecord(exceptionResponse) &&
+              typeof exceptionResponse.message === 'string'
+            ? exceptionResponse.message
+            : 'Internal server error';
 
     response.status(status).json({
       success: false,

@@ -21,4 +21,11 @@ export class DayhomeRepository {
   async create(data: CreationAttributes<Dayhome>): Promise<Dayhome> {
     return this.dayhomeModel.create(data);
   }
+
+  async update(
+    id: string,
+    data: Partial<Record<string, unknown>>,
+  ): Promise<void> {
+    await this.dayhomeModel.update(data, { where: { id } });
+  }
 }

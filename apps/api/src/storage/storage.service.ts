@@ -30,4 +30,18 @@ export class StorageService {
       bucket,
     };
   }
+
+  async uploadBuffer(
+    buffer: Buffer,
+    fileName: string,
+    contentType?: string,
+  ): Promise<{ fileName: string; bucket: string }> {
+    const bucket = this.config.get<string>('MINIO_BUCKET')!;
+
+    await this.client.putObject(bucket, fileName, buffer, buffer.length, {
+      'Content-Type': contentType ?? 'application/octet-stream',
+    });
+
+    return { fileName, bucket };
+  }
 }
