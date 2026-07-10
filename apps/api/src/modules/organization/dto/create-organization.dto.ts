@@ -1,5 +1,6 @@
 import {
   IsEmail,
+  IsIn,
   IsOptional,
   IsString,
   MinLength,
@@ -22,4 +23,8 @@ export class CreateOrganizationDto {
   @IsOptional()
   @IsString()
   status?: string;
+
+  @ApiProperty({ enum: ['system', 'dayhome', 'parent'], default: 'dayhome' })
+  @IsIn(['system', 'dayhome', 'parent'])
+  type!: string;
 }

@@ -23,6 +23,12 @@ export class Organization extends Model<Organization> {
   })
   declare status: string;
 
+  @Column({
+    type: DataType.ENUM('system', 'dayhome', 'parent'),
+    defaultValue: 'dayhome',
+  })
+  declare type: string;
+
   @HasMany(() => Dayhome)
   declare dayhomes: Dayhome[];
 

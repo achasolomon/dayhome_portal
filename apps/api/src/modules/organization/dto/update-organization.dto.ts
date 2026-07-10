@@ -1,5 +1,6 @@
 import {
   IsEmail,
+  IsIn,
   IsOptional,
   IsString,
   MinLength,
@@ -24,4 +25,9 @@ export class UpdateOrganizationDto {
   @IsOptional()
   @IsString()
   status?: string;
+
+  @ApiProperty({ enum: ['system', 'dayhome', 'parent'], required: false })
+  @IsOptional()
+  @IsIn(['system', 'dayhome', 'parent'])
+  type?: string;
 }

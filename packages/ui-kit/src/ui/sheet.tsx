@@ -31,10 +31,16 @@ const sheetSizes = {
   full: 'sm:max-w-[100vw]',
 };
 
-interface SheetContentProps
-  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
+interface SheetContentProps {
   side?: 'left' | 'right';
   size?: keyof typeof sheetSizes;
+  children?: React.ReactNode;
+  className?: string;
+  onOpenAutoFocus?: (e: Event) => void;
+  onCloseAutoFocus?: (e: Event) => void;
+  onEscapeKeyDown?: (e: KeyboardEvent) => void;
+  onPointerDownOutside?: (e: Event) => void;
+  onInteractOutside?: (e: Event) => void;
 }
 
 const SheetContent = React.forwardRef<

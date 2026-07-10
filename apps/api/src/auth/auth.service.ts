@@ -3,12 +3,14 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.model';
 import { UserDto } from '../users/dto/user.dto';
 import { QueuesService } from '../queues/queues.service';
+import { Organization } from '../database/models/organization.model';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
@@ -26,6 +28,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly queuesService: QueuesService,
+    @InjectModel(Organization)
+    private readonly organizationModel: typeof Organization,
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -41,7 +45,18 @@ export class AuthService {
   }
 
   async login(user: User): Promise<LoginResult> {
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const org = user.organizationId
+      ? await this.organizationModel.findByPk(user.organizationId, {
+          attributes: ['type'],
+        })
+      : null;
+    const orgType = org?.type;
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      orgType,
+    };
     const refreshTokenId = crypto.randomUUID();
 
     const accessToken = this.jwtService.sign(payload);
@@ -58,7 +73,7 @@ export class AuthService {
 
     await user.update({ refreshToken: refreshTokenId });
 
-    const safeUser = UserDto.fromModel(user);
+    const safeUser = UserDto.fromModel(user, orgType);
     return { accessToken, refreshToken, user: safeUser };
   }
 

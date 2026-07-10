@@ -24,6 +24,9 @@ export class UserDto {
   organizationId?: string;
 
   @ApiProperty()
+  organizationType?: string;
+
+  @ApiProperty()
   dayhomeId?: string;
 
   @ApiProperty()
@@ -35,7 +38,7 @@ export class UserDto {
   @ApiProperty()
   updatedAt!: Date;
 
-  static fromModel(user: User): UserDto {
+  static fromModel(user: User, organizationType?: string): UserDto {
     return {
       id: user.id,
       email: user.email,
@@ -44,6 +47,7 @@ export class UserDto {
       lastName: user.lastName,
       phone: user.phone,
       organizationId: user.organizationId,
+      organizationType: organizationType,
       dayhomeId: user.dayhomeId,
       permissions: user.permissions,
       createdAt: user.createdAt,
