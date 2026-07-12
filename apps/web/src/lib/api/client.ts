@@ -7,6 +7,13 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+apiClient.interceptors.response.use((response) => {
+  if (response.data && typeof response.data === 'object' && 'success' in response.data) {
+    response.data = response.data.data;
+  }
+  return response;
+});
+
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
   if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -41,7 +48,8 @@ apiClient.interceptors.response.use(
           {},
           { withCredentials: true },
         );
-        const { accessToken, user } = response.data;
+        const body = response.data?.data ?? response.data;
+        const { accessToken, user } = body;
         useAuthStore.getState().setTokens(accessToken, user);
 
         failedQueue.forEach((p) => p.resolve(accessToken));

@@ -2,8 +2,8 @@
   "name": "@spiced-dayhome/ui-kit",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/index.ts",
-  "module": "./src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./src/index.ts",
   "files": [
     "src"

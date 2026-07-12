@@ -296,7 +296,7 @@ describe('Auth (e2e)', () => {
 
   describe('POST /api/v1/auth/forgot-password', () => {
     it('should return 201 when email is provided', async () => {
-      authService.forgotPassword.mockResolvedValue(undefined);
+      authService.forgotPassword.mockResolvedValue({ message: 'ok' });
 
       await request(app.getHttpServer())
         .post('/api/v1/auth/forgot-password')
@@ -326,7 +326,7 @@ describe('Auth (e2e)', () => {
 
   describe('POST /api/v1/auth/reset-password', () => {
     it('should return 201 when token and password are valid', async () => {
-      authService.resetPassword.mockResolvedValue(undefined);
+      authService.resetPassword.mockResolvedValue({ message: 'ok' });
 
       await request(app.getHttpServer())
         .post('/api/v1/auth/reset-password')

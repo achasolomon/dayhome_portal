@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,7 +26,7 @@ const acceptInviteSchema = z
 
 type AcceptInviteForm = z.infer<typeof acceptInviteSchema>;
 
-export default function AcceptInvitePage() {
+function AcceptInviteForm() {
   const router = useRouter();
   const { t } = useTranslation();
   const searchParams = useSearchParams();
@@ -194,5 +194,13 @@ export default function AcceptInvitePage() {
         </Button>
       </form>
     </div>
+  );
+}
+
+export default function AcceptInvitePage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
+      <AcceptInviteForm />
+    </Suspense>
   );
 }

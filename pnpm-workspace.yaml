@@ -2,5 +2,7 @@ packages:
   - "apps/*"
   - "packages/*"
 allowBuilds:
+  '@scarf/scarf': true
   esbuild: true
-  msgpackr-extract: set this to true or false
+  msgpackr-extract: true
+  unrs-resolver: true

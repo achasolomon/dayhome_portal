@@ -21,7 +21,10 @@ import { Document } from './entities/document.entity';
 import { UsersService } from '../../users/users.service';
 import { StorageService } from '../../storage/storage.service';
 import { CallbacksService } from '../callbacks/callbacks.service';
-import { ERROR_CODES } from '@spiced-dayhome/shared-types';
+import { ERROR_CODES, PaginatedResponse } from '@spiced-dayhome/shared-types';
+import { DayhomeQueryDto } from './dto/dayhome-query.dto';
+import { DayhomeListItemDto } from './dto/dayhome-list-item.dto';
+import { DayhomeDetailDto } from './dto/dayhome-detail.dto';
 
 const CATEGORY_TO_DOCUMENT_TYPE: Record<string, string> = {
   home_insurance: 'INSURANCE',
@@ -219,6 +222,35 @@ export class DayhomeService {
     );
 
     return IntakeResponseDto.from(dayhome);
+  }
+
+  async findAll(
+    query: DayhomeQueryDto,
+  ): Promise<PaginatedResponse<DayhomeListItemDto>> {
+    const { data, pagination } = await this.repository.findAll({
+      status: query.status,
+      search: query.search,
+      page: query.page!,
+      limit: query.limit!,
+    });
+
+    return {
+      success: true,
+      data: data.map((d) => DayhomeListItemDto.from(d)),
+      meta: {},
+      pagination,
+    };
+  }
+
+  async findById(id: string): Promise<DayhomeDetailDto> {
+    const dayhome = await this.repository.findById(id);
+    if (!dayhome) {
+      throw new NotFoundException({
+        code: ERROR_CODES.DAYHOME_NOT_FOUND,
+        message: `Dayhome with id ${id} not found`,
+      });
+    }
+    return DayhomeDetailDto.from(dayhome);
   }
 
   async updateStatusFromPortal(dto: CallbackStatusDto): Promise<void> {

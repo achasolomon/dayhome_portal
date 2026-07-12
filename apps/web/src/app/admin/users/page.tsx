@@ -353,7 +353,7 @@ export default function UsersRolesPage() {
       </Card>
 
       {/* Delete Confirmation Modal */}
-      <Modal open={!!deleteConfirm} onOpenChange={(o) => { if (!o) setDeleteConfirm(null); }}>
+      <Modal open={!!deleteConfirm} onOpenChange={(o: boolean) => { if (!o) setDeleteConfirm(null); }}>
         <ModalContent>
           <ModalHeader>
             <ModalTitle>{t('roles.deleteConfirmTitle')}</ModalTitle>

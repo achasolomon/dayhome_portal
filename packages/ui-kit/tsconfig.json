@@ -4,10 +4,7 @@
     "jsx": "react-jsx",
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": ".",
-    "paths": {
-      "@spiced-dayhome/shared-utils": ["../shared-utils/src/index.ts"]
-    }
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src"]
 }
